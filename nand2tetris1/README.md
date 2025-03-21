@@ -39,3 +39,23 @@ Build the following gates using only Nand as primitive:
 - clocks and cycles
 - RAM units
 - counters.
+## Module 4: Machine Language
+- op codes
+- binary machine language
+- assembly
+- low-level arithmetic and programming
+- specification of the "Hack" machine language used in the course to manipulate a simple 16-bit instruction "Hack" von Neumann computer
+## Module 5: Computer architecture
+- Von Neumann and Harvard architectures
+- stored program concept
+- fetch-execute cycle
+- data bus
+- instruction bus
+- CPU
+- computer design
+## Module 6: Assembler
+- binary and symbolic machine languages
+- symbol tables
+- code generation
+- cross assembler
+- assembler implementation
