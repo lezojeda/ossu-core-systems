@@ -1,1 +1,1 @@
-# OSSU Core theory
+# OSSU Core systems
