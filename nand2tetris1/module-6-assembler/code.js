@@ -1,20 +1,38 @@
-/**
- * translateToBinary - Translates Hack assembly language mnemonics into binary codes.
- *
- * @param {string} mnemonic - The Hack assembly language mnemonic to be translated.
- * @returns {string} - The binary representation of the given mnemonic.
- */
-function translateToBinary(mnemonic) {
-	let binaryCode = "";
-	for (let line of mnemonic) {
-		const commandType = getCommandType(line);
+const { getSymbol, getCommandType } = require('./common')
 
-		if (commandType === "A_COMMAND" || commandType === "L_COMMAND") {
-			const symbol = getSymbol(line);
-			const binary = convertToBinary(symbol).padStart(16, "0");
-			binaryCode += `${binary}\n`;
-		} else {
-			const { comp, dest, jump } = parseCInstruction(line);
+/**
+ * translateToBinary - Translates Hack assembly language commands into binary codes.
+ *
+ * @param {string} commands - The Hack assembly language commands to be translated.
+ * @returns {string} - The binary representation of the given commands.
+ */
+function translateToBinary(commands, symbolTable) {
+	const extendedSymbolTable = { ...symbolTable };
+	let availableRAM = 16;
+	let binaryCode = "";
+
+	for (let command of commands) {
+		const commandType = getCommandType(command);
+
+		if (commandType === "A_COMMAND") {
+			let binary;
+			const symbol = getSymbol(command);
+
+			if (isNaN(parseInt(symbol))) {
+				if (extendedSymbolTable.hasOwnProperty(symbol)) {
+					binary = convertToBinary(extendedSymbolTable[symbol]);
+				} else {
+					binary = convertToBinary(availableRAM);
+					extendedSymbolTable[symbol] = availableRAM;
+					availableRAM += 1;
+				}
+			} else {
+				binary = convertToBinary(symbol);
+			}
+
+			binaryCode += `${binary.padStart(16, "0")}\n`;
+		} else if (commandType === "C_COMMAND") {
+			const { comp, dest, jump } = parseCInstruction(command);
 
 			const binComp = convertCompToBinary(comp);
 			const binDest = convertDestToBinary(dest);
@@ -28,31 +46,6 @@ function translateToBinary(mnemonic) {
 }
 
 /**
- * Determines type of Hack assembly language command
- *
- * @param {string} command - Hack assembly language command.
- * @returns {'A_COMMAND'|'C_COMMAND'|'L_COMMAND'} The type of the command
- */
-function getCommandType(command) {
-	if (command.startsWith("@")) {
-		return "A_COMMAND";
-	} else if (command.includes("=")) {
-		// this smells
-		return "C_COMMAND";
-	} else {
-		return "L_COMMAND";
-	}
-}
-
-function getSymbol(command) {
-	if (command.startsWith("@")) {
-		return command.slice(1);
-	} else if (command.startsWith("(")) {
-		return command.slice(1, -1);
-	}
-}
-
-/**
  * Converts a command to its binary representation
  *
  * @param {string} command - Hack Assembly A or L type command.
@@ -62,9 +55,9 @@ function convertToBinary(command) {
 	return parseInt(command).toString(2);
 }
 
-function parseCInstruction(line) {
+function parseCInstruction(instruction) {
 	const regex = /^(?:([AMD]+)=)?([^;]+)(?:;(.+))?$/;
-	const match = line.match(regex);
+	const match = instruction.match(regex);
 
 	if (match) {
 		const [_, dest, comp, jump] = match;
@@ -136,7 +129,7 @@ function convertJmpToBinary(jmp) {
 	if (!jmp) return "000";
 
 	const jmpTable = {
-		JGT: "000",
+		JGT: "001",
 		JEQ: "010",
 		JGE: "011",
 		JLT: "100",

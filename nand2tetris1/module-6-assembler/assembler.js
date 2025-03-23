@@ -2,27 +2,26 @@ const fsp = require("node:fs/promises");
 const path = require("node:path");
 const { parse } = require("./parser");
 const { translateToBinary } = require("./code");
+const { buildSymbolTable } = require("./symbolTable");
 
 /**
  * assemble - Creates a 'Prog.hack' representing the translated Hack machine code from the given Hack assembly program.
  *
- * @param {string} program - A string representing a hack assembly program.
+ * @param {string} inputFilePath - A string representing the hack assembly program's file path.
  * @returns {void} - Does not return a value.
  * @throws Will log an error message if file creation fails.
  * @assumes The input is always valid.
  */
-async function assemble(program) {
+async function assemble(inputFilePath, outputFileName) {
 	try {
-		const assemblyCode = await parse(program);
-		
-		// 2. Code module: For each field, generate the corresponding bits in the machine language.
-		const binaryCode = translateToBinary(assemblyCode);
+		const commands = await parse(inputFilePath);
+
+		const symbolTable = buildSymbolTable(commands);
 	
-		// 3. Symbol table module: Replace all symbolic references (if any) with numeric addresses of memory locations.
-		// 4. Assemble the binary codes into a complete machine instruction
+		const binaryCode = translateToBinary(commands, symbolTable);
 
 		// Write file
-		const outputFilePath = path.join(__dirname, "Prog.hack");
+		const outputFilePath = path.join(__dirname, 'bin', `${outputFileName ?? 'Prog'}.hack`);
 		await fsp.writeFile(outputFilePath, binaryCode);
 		console.log("Successfully created the hack file.");
 	} catch (err) {
@@ -31,10 +30,11 @@ async function assemble(program) {
 }
 
 const inputFilePath = process.argv[2];
+const outputFileName = process.argv[3];
 
 if (!inputFilePath) {
 	console.error("Usage: node app.js <inputFilePath>");
 	process.exit(1);
 }
 
-assemble(inputFilePath);
+assemble(inputFilePath, outputFileName);
