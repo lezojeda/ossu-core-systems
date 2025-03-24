@@ -32,19 +32,22 @@ Build the following gates using only Nand as primitive:
   - Division
 - Building a half, full and complete adder
 - Building a "hack" ALU
+### Project
 ## Module 3: Memory
 - combinational vs sequential logic
 - flip-flops
 - 1-bit and multi-bit registers
 - clocks and cycles
 - RAM units
-- counters.
+- counters
+### Project
 ## Module 4: Machine Language
 - op codes
 - binary machine language
 - assembly
 - low-level arithmetic and programming
 - specification of the "Hack" machine language used in the course to manipulate a simple 16-bit instruction "Hack" von Neumann computer
+### Project
 ## Module 5: Computer architecture
 - Von Neumann and Harvard architectures
 - stored program concept
@@ -53,9 +56,11 @@ Build the following gates using only Nand as primitive:
 - instruction bus
 - CPU
 - computer design
+### Project
 ## Module 6: Assembler
 - binary and symbolic machine languages
 - symbol tables
 - code generation
 - cross assembler
 - assembler implementation
+### Project

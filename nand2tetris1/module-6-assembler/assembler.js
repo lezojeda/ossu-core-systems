@@ -33,7 +33,7 @@ const inputFilePath = process.argv[2];
 const outputFileName = process.argv[3];
 
 if (!inputFilePath) {
-	console.error("Usage: node app.js <inputFilePath>");
+	console.error("Usage: node assembler.js <inputFilePath>");
 	process.exit(1);
 }
 

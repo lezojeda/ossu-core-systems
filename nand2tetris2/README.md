@@ -7,3 +7,6 @@
 - pointers
 - VM implementation
 - VM translators
+### Project
+Build a basic VM translator that handles a subset of the VM language: stack arithmetic and memory access (`push`/`pop`) commands
+## Module 2:

@@ -4,7 +4,7 @@ const readline = require("readline");
 
 /**
  * parse - Reads a Hack assembly language file line by line parsing them by removing white space and comments,
- * and returns all parsed lines as commands concatenated by newline characters together as an array of strings.
+ * and returns all parsed lines as commands in an array of strings.
  *
  * @param {string} inputCode - The path to the input file with the code to be read.
  * @returns {Promise<string[]>} A promise that resolves to an array containing all parsed lines from the file
