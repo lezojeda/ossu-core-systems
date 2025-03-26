@@ -16,13 +16,14 @@ M=D
 // SP++
 @SP
 M=M+1
-@SP // pop first value
+// add
+@SP
 M=M-1
 A=M
 D=M
-@SP // pop second value
+@SP
 M=M-1
 A=M
-M=D+M // sum and store
+M=D+M
 @SP
 M=M+1

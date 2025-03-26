@@ -9,29 +9,25 @@ function translateCommand(type, arg1, arg2, index) {
 function writeArithmetic(command, index) {
 	switch (command) {
 		case "add":
-			return `@SP // pop first value
-M=M-1#
-A=M
-D=M
-@SP // pop second value
+			return `// add
+@SP
 M=M-1
 A=M
-M=D+M // sum and store
-@SP
-M=M+1`;
+D=M
+A=A-1
+D=D+M
+M=D`;
 		case "sub":
-			return `@SP
+			return `// sub
+@SP
 M=M-1
 A=M
 D=M
-@SP
-M=M-1
-A=M
-M=D-M // subtract and store
-@SP
-M=M+1`;
+A=A-1
+D=M-D
+M=D`;
 		case "eq":
-			return `
+			return `// eq
 @SP
 M=M-1
 A=M
@@ -39,56 +35,83 @@ D=M
 A=A-1
 D=M-D
 @EQ_${index}
-D;JEQ // if they are not equal, set RAM[SP] to 0
+D;JEQ
 @SP
 A=M-1
 M=0
 @END_${index}
 0;JMP
-
 (EQ_${index})
-@SP // otherwise set RAM[SP] to -1 (all 1s)
+@SP
 A=M-1
 M=-1
-@END_${index}`;
+(END_${index})`;
 		case "lt":
-			return `@SP
+			return `// lt
+@SP
 M=M-1
 A=M
 D=M
 A=A-1
 D=M-D
-@EQ_${index}
-D;JLT // if x - y is > 0 then x > y, in that case don't jump
+@LT_${index}
+D;JLT
 @SP
 A=M-1
 M=0
 @END_${index}
 0;JMP
-(EQ_${index})
+(LT_${index})
 @SP
 A=M-1
 M=-1
 (END_${index})`;
 		case "gt":
-			return `@SP
+			return `// gt
+@SP
 M=M-1
 A=M
 D=M
 A=A-1
 D=M-D
-@EQ_${index}
-D;JGT // if x - y is > 0 then x > y, in that case jump
+@GT_${index}
+D;JGT
 @SP
 A=M-1
 M=0
 @END_${index}
 0;JMP
-(EQ_${index})
+(GT_${index})
 @SP
 A=M-1
 M=-1
 (END_${index})`;
+		case "neg":
+			return `// neg
+@SP
+A=M-1
+M=-M`;
+		case "and":
+			return `// and
+@SP
+M=M-1
+A=M
+D=M
+A=A-1
+M=D&M`;
+		case "or":
+			return `// or
+@SP
+M=M-1
+A=M
+D=M
+A=A-1
+M=D|M`;
+		case "not":
+			return `// not
+@SP
+A=M-1
+M=!M`;
 	}
 }
 

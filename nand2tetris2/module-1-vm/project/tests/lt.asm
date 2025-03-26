@@ -1,4 +1,4 @@
-@12
+@1234
 D=A
 // RAM[SP]=D
 @SP
@@ -7,7 +7,7 @@ M=D
 // SP++
 @SP
 M=M+1
-@5
+@4321
 D=A
 // RAM[SP]=D
 @SP
@@ -23,6 +23,4 @@ D=M
 @SP
 M=M-1
 A=M
-M=D-M // subtract and store
-@SP
-M=M+1
+M=D&M
