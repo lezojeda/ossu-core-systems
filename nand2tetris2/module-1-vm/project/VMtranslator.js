@@ -11,7 +11,7 @@ if (!inputFilePath) {
 
 const hackCode = readVMfile(inputFilePath)
 	.map(parseCommand)
-	.map(command => translateCommand(command.type, command.arg1, command.arg2))
+	.map((command, index) => translateCommand(command.type, command.arg1, command.arg2, index))
 	.join("\n");
 
 const outputFilePath = inputFilePath.replace(".vm", ".asm");
