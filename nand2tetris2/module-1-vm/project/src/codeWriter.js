@@ -2,7 +2,7 @@ function translateCommand(type, arg1, arg2, index) {
 	if (type === "C_ARITHMETIC") {
 		return writeArithmetic(arg1, index);
 	} else if (type === "C_PUSH" || type === "C_POP") {
-		return writePushPop(type, arg1, arg2);
+		return writePushPop(type, arg1, arg2, index);
 	}
 }
 
@@ -115,18 +115,55 @@ M=!M`;
 	}
 }
 
-function writePushPop(command, segment, index) {
+function writePushPop(command, segment, index, line) {
 	if (command === "C_PUSH") {
-		if (segment === "constant")
+		if (segment === "constant") {
 			return `@${index}
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
+@SP
+M=M+1`;
+		} else if (segment === "local") {
+			return `// push local i
+@LCL
+D=M
+@${index}
+D=D+A
+A=D
+D=M
+
+// RAM[SP] <- RAM[addr]
+@SP
+A=M
+M=D
+
 // SP++
 @SP
 M=M+1`;
+		}
+	} else if (command === "C_POP") {
+		if (segment === "local") {
+			return `// pop local i
+@LCL
+D=M
+@${index}
+D=D+A
+@addr_${line}
+M=D
+
+// SP--
+@SP
+M=M-1
+A=M
+D=M
+
+// RAM[addr] <- RAM[SP]
+@addr_${line}
+A=M
+M=D`;
+		}
 	}
 }
 
