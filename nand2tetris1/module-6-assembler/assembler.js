@@ -18,9 +18,8 @@ async function assemble(inputFilePath, outputFileName) {
 
 		const symbolTable = buildSymbolTable(commands);
 	
-		const binaryCode = translateToBinary(commands, symbolTable);
+		const binary = translateToBinary(commands, symbolTable);
 
-		// Write file
 		const outputFilePath = path.join(__dirname, 'bin', `${outputFileName ?? 'Prog'}.hack`);
 		await fsp.writeFile(outputFilePath, binaryCode);
 		console.log("Successfully created the hack file.");
