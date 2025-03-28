@@ -116,54 +116,105 @@ M=!M`;
 }
 
 function writePushPop(command, segment, index, line) {
-	if (command === "C_PUSH") {
-		if (segment === "constant") {
-			return `@${index}
+	// Mapping of logical segments to their assembly memory references
+	const segmentMap = {
+		local: "LCL",
+		argument: "ARG",
+		this: "THIS",
+		that: "THAT",
+	};
+
+	switch (command) {
+		case "C_PUSH":
+			// Special case for constant
+			if (segment === "constant") {
+				return `@${index}
 D=A
 @SP
 A=M
 M=D
 @SP
 M=M+1`;
-		} else if (segment === "local") {
-			return `// push local i
-@LCL
+			}
+
+			if (segmentMap[segment]) {
+				return `// push ${segment} i
+@${segmentMap[segment]}
 D=M
 @${index}
 D=D+A
 A=D
 D=M
-
 // RAM[SP] <- RAM[addr]
 @SP
 A=M
 M=D
-
 // SP++
 @SP
 M=M+1`;
-		}
-	} else if (command === "C_POP") {
-		if (segment === "local") {
-			return `// pop local i
-@LCL
+			}
+
+			if (segment === "temp") {
+				return `// push temp i
+@5
+D=A
+@${index}
+D=D+A
+A=D
+D=M
+// RAM[SP] <- RAM[addr]
+@SP
+A=M
+M=D
+// SP++
+@SP
+M=M+1`;
+			}
+
+			throw new Error(`Unsupported push segment: ${segment}`);
+
+		case "C_POP":
+			if (segmentMap[segment]) {
+				return `// pop ${segment} i
+@${segmentMap[segment]}
 D=M
 @${index}
 D=D+A
 @addr_${line}
 M=D
-
 // SP--
 @SP
 M=M-1
 A=M
 D=M
-
 // RAM[addr] <- RAM[SP]
 @addr_${line}
 A=M
 M=D`;
-		}
+			}
+			if (segment === "temp") {
+				return `// pop temp i
+@5
+D=A
+@${index}
+D=D+A
+@addr_${line}
+M=D
+// SP--
+@SP
+M=M-1
+A=M
+D=M
+// RAM[addr] <- RAM[SP]
+@addr_${line}
+A=M
+M=D`;
+			}
+
+			throw new Error(`Unsupported pop segment: ${segment}`);
+
+		default:
+			throw new Error(`Unsupported command: ${command}`);
 	}
 }
 
