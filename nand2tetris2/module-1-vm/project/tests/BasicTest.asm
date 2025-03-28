@@ -5,7 +5,7 @@ A=M
 M=D
 @SP
 M=M+1
-// pop local i
+// pop local 0
 @LCL
 D=M
 @0
@@ -35,7 +35,7 @@ A=M
 M=D
 @SP
 M=M+1
-// pop argument i
+// pop argument 2
 @ARG
 D=M
 @2
@@ -51,7 +51,7 @@ D=M
 @addr_4
 A=M
 M=D
-// pop argument i
+// pop argument 1
 @ARG
 D=M
 @1
@@ -74,7 +74,7 @@ A=M
 M=D
 @SP
 M=M+1
-// pop this i
+// pop this 6
 @THIS
 D=M
 @6
@@ -104,7 +104,7 @@ A=M
 M=D
 @SP
 M=M+1
-// pop that i
+// pop that 5
 @THAT
 D=M
 @5
@@ -120,7 +120,7 @@ D=M
 @addr_10
 A=M
 M=D
-// pop that i
+// pop that 2
 @THAT
 D=M
 @2
@@ -143,7 +143,7 @@ A=M
 M=D
 @SP
 M=M+1
-// pop temp i
+// pop temp 6
 @5
 D=A
 @6
@@ -159,32 +159,28 @@ D=M
 @addr_13
 A=M
 M=D
-// push local i
+// push local 0
 @LCL
 D=M
 @0
 D=D+A
 A=D
 D=M
-// RAM[SP] <- RAM[addr]
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
-// push that i
+// push that 5
 @THAT
 D=M
 @5
 D=D+A
 A=D
 D=M
-// RAM[SP] <- RAM[addr]
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // add
@@ -195,18 +191,16 @@ D=M
 A=A-1
 D=D+M
 M=D
-// push argument i
+// push argument 1
 @ARG
 D=M
 @1
 D=D+A
 A=D
 D=M
-// RAM[SP] <- RAM[addr]
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // sub
@@ -217,32 +211,28 @@ D=M
 A=A-1
 D=M-D
 M=D
-// push this i
+// push this 6
 @THIS
 D=M
 @6
 D=D+A
 A=D
 D=M
-// RAM[SP] <- RAM[addr]
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
-// push this i
+// push this 6
 @THIS
 D=M
 @6
 D=D+A
 A=D
 D=M
-// RAM[SP] <- RAM[addr]
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // add
@@ -261,18 +251,16 @@ D=M
 A=A-1
 D=M-D
 M=D
-// push temp i
+// push temp 6
 @5
 D=A
 @6
 D=D+A
 A=D
 D=M
-// RAM[SP] <- RAM[addr]
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // add

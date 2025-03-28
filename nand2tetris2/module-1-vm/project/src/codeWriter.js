@@ -1,4 +1,6 @@
-function translateCommand(type, arg1, arg2, index) {
+function translateCommand(command, index) {
+	const {type, arg1, arg2} = command;
+
 	if (type === "C_ARITHMETIC") {
 		return writeArithmetic(arg1, index);
 	} else if (type === "C_PUSH" || type === "C_POP") {
