@@ -7,7 +7,7 @@
             "name": "VM Translator Debug",
             "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v20.15.1/bin/node",
             "program": "${workspaceFolder}/VMtranslator.js",
-            "args": ["./tests/SimpleAdd.vm"],
+            "args": ["./tests/PointerTest.vm"],
             "cwd": "${workspaceFolder}"
         }
     ]

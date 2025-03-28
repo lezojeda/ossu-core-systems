@@ -138,35 +138,42 @@ M=M+1`;
 			}
 
 			if (segmentMap[segment]) {
-				return `// push ${segment} i
+				return `// push ${segment} ${index}
 @${segmentMap[segment]}
 D=M
 @${index}
 D=D+A
 A=D
 D=M
-// RAM[SP] <- RAM[addr]
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1`;
 			}
 
 			if (segment === "temp") {
-				return `// push temp i
+				return `// push temp ${index}
 @5
 D=A
 @${index}
 D=D+A
 A=D
 D=M
-// RAM[SP] <- RAM[addr]
 @SP
 A=M
 M=D
-// SP++
+@SP
+M=M+1`;
+			}
+			if (segment === "pointer") {
+				const finalSegment = index === '1' ? "THAT" : "THIS";
+				return `// push pointer ${index}
+@${finalSegment}
+D=M
+@SP
+A=M
+M=D
 @SP
 M=M+1`;
 			}
@@ -175,7 +182,7 @@ M=M+1`;
 
 		case "C_POP":
 			if (segmentMap[segment]) {
-				return `// pop ${segment} i
+				return `// pop ${segment} ${index}
 @${segmentMap[segment]}
 D=M
 @${index}
@@ -193,7 +200,7 @@ A=M
 M=D`;
 			}
 			if (segment === "temp") {
-				return `// pop temp i
+				return `// pop temp ${index}
 @5
 D=A
 @${index}
@@ -208,6 +215,16 @@ D=M
 // RAM[addr] <- RAM[SP]
 @addr_${line}
 A=M
+M=D`;
+			}
+			if (segment === "pointer") {
+				const finalSegment = index === '1' ? "THAT" : "THIS";
+				return `// pop pointer ${index}
+@SP
+M=M-1
+A=M
+D=M
+@${finalSegment}
 M=D`;
 			}
 
