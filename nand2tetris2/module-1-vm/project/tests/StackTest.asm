@@ -1,19 +1,15 @@
 @17
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 @17
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // eq
@@ -37,20 +33,16 @@ M=-1
 (END_2)
 @17
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 @16
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // eq
@@ -74,20 +66,16 @@ M=-1
 (END_5)
 @16
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 @17
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // eq
@@ -111,20 +99,16 @@ M=-1
 (END_8)
 @892
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 @891
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // lt
@@ -148,20 +132,16 @@ M=-1
 (END_11)
 @891
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 @892
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // lt
@@ -185,20 +165,16 @@ M=-1
 (END_14)
 @891
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 @891
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // lt
@@ -222,20 +198,16 @@ M=-1
 (END_17)
 @32767
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 @32766
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // gt
@@ -259,20 +231,16 @@ M=-1
 (END_20)
 @32766
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 @32767
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // gt
@@ -296,20 +264,16 @@ M=-1
 (END_23)
 @32766
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 @32766
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // gt
@@ -333,29 +297,23 @@ M=-1
 (END_26)
 @57
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 @31
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 @53
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // add
@@ -368,11 +326,9 @@ D=D+M
 M=D
 @112
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // sub
@@ -396,11 +352,9 @@ A=A-1
 M=D&M
 @82
 D=A
-// RAM[SP]=D
 @SP
 A=M
 M=D
-// SP++
 @SP
 M=M+1
 // or

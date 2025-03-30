@@ -1,5 +1,5 @@
 function translateCommand(command, index) {
-	const {type, arg1, arg2} = command;
+	const { type, arg1, arg2 } = command;
 
 	if (type === "C_ARITHMETIC") {
 		return writeArithmetic(arg1, index);
@@ -169,9 +169,20 @@ M=D
 M=M+1`;
 			}
 			if (segment === "pointer") {
-				const finalSegment = index === '1' ? "THAT" : "THIS";
+				const finalSegment = index === "1" ? "THAT" : "THIS";
 				return `// push pointer ${index}
 @${finalSegment}
+D=M
+@SP
+A=M
+M=D
+@SP
+M=M+1`;
+			}
+
+			if (segment === "static") {
+				return `// push static ${index}
+@STATIC.{index}
 D=M
 @SP
 A=M
@@ -220,13 +231,23 @@ A=M
 M=D`;
 			}
 			if (segment === "pointer") {
-				const finalSegment = index === '1' ? "THAT" : "THIS";
+				const finalSegment = index === "1" ? "THAT" : "THIS";
 				return `// pop pointer ${index}
 @SP
 M=M-1
 A=M
 D=M
 @${finalSegment}
+M=D`;
+			}
+
+			if (segment === "static") {
+				return `// push static ${index}
+@SP
+M=M-1
+A=M
+D=M
+@STATIC.{index}
 M=D`;
 			}
 
