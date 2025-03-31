@@ -8,14 +8,9 @@ function translateCommand(command, index, filename) {
 	} else if (type === "C_LABEL") {
 		return writeLabel(arg1);
 	} else if (type === "C_GO_TO") {
-		/**
-		 * Effects an unconditional goto operation, causing execution to continue from the location marked by the label. The jump destination must be located in the same function.
-		 */
-		return writeGoTo()
+		return writeGoTo(arg1);
 	} else if ("C_IF") {
-		/** Effects a conditional goto operation. The stack’s topmost value is popped; if the value is not zero, execution continues from the location marked by the label; otherwise, execution continues from the next command in the program. The jump destination must be located in the same function.
-		 *
-		 */
+		return writeIf(arg1);
 	}
 }
 
@@ -165,7 +160,6 @@ M=D
 @SP
 M=M+1`;
 			}
-
 			if (segment === "temp") {
 				return `// push temp ${index}
 @5
@@ -191,7 +185,6 @@ M=D
 @SP
 M=M+1`;
 			}
-
 			if (segment === "static") {
 				return `// push static ${index}
 @${filename}.${index}
@@ -278,7 +271,7 @@ function writeLabel(label) {
 function writeGoTo(label) {
 	return `// goto ${label}
 @${label}
-0;JMP`
+0;JMP`;
 }
 
 function writeIf(label) {
@@ -288,7 +281,7 @@ M=M-1
 A=M
 D=M
 @${label}
-D;JNE`
+D;JNE`;
 }
 
 module.exports = { translateCommand };
