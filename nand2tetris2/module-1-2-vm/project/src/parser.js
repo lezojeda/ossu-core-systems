@@ -8,19 +8,16 @@ const fs = require("fs");
  */
 function readVMfile(path) {
 	const content = fs.readFileSync(path, "utf8");
-	return content
-		.split("\n")
-		.map(line => line.split("//")[0].trim())
-		.filter(line => line);
+	return content.split("\n").map(line => line.split("//")[0].trim());
 }
 
 function parseCommand(VMcommand) {
 	const type = getCommandType(VMcommand);
-    return {
-      type,
-      arg1: getArg1(VMcommand, type),
-      arg2: getArg2(VMcommand, type)
-    };
+	return {
+		type,
+		arg1: getArg1(VMcommand, type),
+		arg2: getArg2(VMcommand, type),
+	};
 }
 
 /**
@@ -61,7 +58,7 @@ function getCommandType(VMcommand) {
  */
 function getArg1(VMcommand, type) {
 	if (type === "C_ARITHMETIC") {
-		return VMcommand
+		return VMcommand;
 	} else if (type !== "C_RETURN") {
 		return VMcommand.split(" ")[1];
 	}

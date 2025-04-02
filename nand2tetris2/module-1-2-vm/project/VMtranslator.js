@@ -6,7 +6,7 @@ const path = require("path");
 const inputPath = process.argv[2];
 
 if (!inputPath) {
-	console.error("Usage: node VMtranslator.js <inputFilePath>");
+	console.error("Input parameter missing. Usage: node VMtranslator.js <inputPath>");
 	process.exit(1);
 }
 
@@ -22,16 +22,18 @@ if (fs.lstatSync(inputPath).isDirectory()) {
 		files.forEach(file => {
 			if (path.extname(file) !== ".vm") return;
 
+			const fullPath = path.join(inputPath, file);
 			const fileBaseName = path.basename(file, ".vm");
 
-			const fullPath = path.join(inputPath, file);
-			finalAsmCode += translateVMfile(fullPath, fileBaseName, true);
+			finalAsmCode += translateVMfile(fullPath, fileBaseName);
 		});
 
 		fs.writeFileSync(path.join(inputPath, "final.asm"), finalAsmCode);
 	});
 } else {
-	fs.writeFileSync(inputPath.replace(".vm", ".asm"), translateVMfile(inputPath, path.basename(inputPath, ".vm")));
+	const filename = inputPath.replace(".vm", ".asm");
+	const data = translateVMfile(inputPath, path.basename(inputPath, ".vm"));
+	fs.writeFileSync(filename, data);
 }
 
 function translateVMfile(path, fileBaseName) {
@@ -42,4 +44,3 @@ function translateVMfile(path, fileBaseName) {
 
 	return hackAsmCode;
 }
-

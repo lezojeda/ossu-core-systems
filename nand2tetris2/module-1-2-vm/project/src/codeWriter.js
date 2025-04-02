@@ -10,22 +10,26 @@ ${writeCall("Sys.init", 0, 1)}
 function translateCommand(command, index, filename) {
 	const { type, arg1, arg2 } = command;
 
-	if (type === "C_ARITHMETIC") {
-		return writeArithmetic(arg1, index);
-	} else if (type === "C_PUSH" || type === "C_POP") {
-		return writePushPop(command, index, filename);
-	} else if (type === "C_LABEL") {
-		return writeLabel(arg1);
-	} else if (type === "C_GO_TO") {
-		return writeGoTo(arg1);
-	} else if (type === "C_IF") {
-		return writeIf(arg1);
-	} else if (type === "C_CALL") {
-		return writeCall(arg1, arg2, index);
-	} else if (type === "C_FUNCTION") {
-		return writeFunction(arg1, arg2);
-	} else {
-		return writeReturn();
+	switch (type) {
+		case "C_ARITHMETIC":
+			return writeArithmetic(arg1, index);
+		case "C_PUSH":
+		case "C_POP":
+			return writePushPop(command, index, filename);
+		case "C_LABEL":
+			return writeLabel(arg1);
+		case "C_GO_TO":
+			return writeGoTo(arg1);
+		case "C_IF":
+			return writeIf(arg1);
+		case "C_CALL":
+			return writeCall(arg1, arg2, index);
+		case "C_FUNCTION":
+			return writeFunction(arg1, arg2);
+		case "C_RETURN":
+			return writeReturn();
+		default:
+			throw new Error(`Unknown command type: ${type}`);
 	}
 }
 

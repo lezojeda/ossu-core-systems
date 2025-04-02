@@ -62,7 +62,18 @@ M=D
 0;JMP
 (Sys.init$ret.1)
 
-	// function Main.fibonacci 0
+	
+
+
+
+
+
+
+
+
+
+
+// function Main.fibonacci 0
 (Main.fibonacci)
 
 
@@ -92,18 +103,18 @@ A=M
 D=M
 A=A-1
 D=M-D
-@LT_3
+@LT_14
 D;JLT
 @SP
 A=M-1
 M=0
-@END_3
+@END_14
 0;JMP
-(LT_3)
+(LT_14)
 @SP
 A=M-1
 M=-1
-(END_3)
+(END_14)
 // if-goto N_LT_2
 @SP
 M=M-1
@@ -233,7 +244,7 @@ D=M-D
 M=D
 // call Main.fibonacci 1
 // save the return address
-@Main.fibonacci$ret.13
+@Main.fibonacci$ret.24
 D=A
 @SP
 A=M
@@ -289,7 +300,7 @@ M=D
 // go to execute the callee's code
 @Main.fibonacci
 0;JMP
-(Main.fibonacci$ret.13)
+(Main.fibonacci$ret.24)
 
 // push argument 0
 @ARG
@@ -320,7 +331,7 @@ D=M-D
 M=D
 // call Main.fibonacci 1
 // save the return address
-@Main.fibonacci$ret.17
+@Main.fibonacci$ret.28
 D=A
 @SP
 A=M
@@ -376,7 +387,7 @@ M=D
 // go to execute the callee's code
 @Main.fibonacci
 0;JMP
-(Main.fibonacci$ret.17)
+(Main.fibonacci$ret.28)
 
 // add
 @SP
@@ -458,8 +469,21 @@ M=D
 @return_address
 A=M
 0;JMP
+
+
+
+
+
+
+
+
+
+
+
+
 // function Sys.init 0
 (Sys.init)
+
 
 
 @4
@@ -469,9 +493,10 @@ A=M
 M=D
 @SP
 M=M+1
+
 // call Main.fibonacci 1
 // save the return address
-@Main.fibonacci$ret.2
+@Main.fibonacci$ret.15
 D=A
 @SP
 A=M
@@ -527,7 +552,7 @@ M=D
 // go to execute the callee's code
 @Main.fibonacci
 0;JMP
-(Main.fibonacci$ret.2)
+(Main.fibonacci$ret.15)
 
 // label END
 (END)
