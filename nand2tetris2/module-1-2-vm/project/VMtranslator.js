@@ -1,5 +1,5 @@
 const { readVMfile, parseCommand } = require("./src/parser");
-const { translateCommand } = require("./src/codeWriter");
+const { translateCommand, writeBootstrapCode } = require("./src/codeWriter");
 const fs = require("fs");
 const path = require("path");
 
@@ -17,25 +17,29 @@ if (fs.lstatSync(inputPath).isDirectory()) {
 			process.exit(1);
 		}
 
+		let finalAsmCode = writeBootstrapCode();
+
 		files.forEach(file => {
 			if (path.extname(file) !== ".vm") return;
 
 			const fileBaseName = path.basename(file, ".vm");
 
 			const fullPath = path.join(inputPath, file);
-			translateVMfile(fullPath, fileBaseName);
+			finalAsmCode += translateVMfile(fullPath, fileBaseName, true);
 		});
+
+		fs.writeFileSync(path.join(inputPath, "final.asm"), finalAsmCode);
 	});
 } else {
-	const fileBaseName = path.basename(inputPath, ".vm");
-	translateVMfile(inputPath, fileBaseName);
+	fs.writeFileSync(inputPath.replace(".vm", ".asm"), translateVMfile(inputPath, path.basename(inputPath, ".vm")));
 }
 
-function translateVMfile(file, fileBaseName) {
-	const hackCode = readVMfile(file)
+function translateVMfile(path, fileBaseName) {
+	let hackAsmCode = readVMfile(path)
 		.map(parseCommand)
 		.map((command, index) => translateCommand(command, index, fileBaseName))
 		.join("\n");
-	const outputFilePath = file.replace(".vm", ".asm");
-	fs.writeFileSync(outputFilePath, hackCode, "utf8");
+
+	return hackAsmCode;
 }
+

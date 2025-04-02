@@ -41,9 +41,11 @@ function getCommandType(VMcommand) {
 	} else if (VMcommand.startsWith("if")) {
 		return "C_IF";
 	} else if (VMcommand.startsWith("function")) {
-		return "C_RETURN";
+		return "C_FUNCTION";
 	} else if (VMcommand.startsWith("call")) {
 		return "C_CALL";
+	} else if (VMcommand.startsWith("return")) {
+		return "C_RETURN";
 	} else {
 		return "C_ARITHMETIC";
 	}
