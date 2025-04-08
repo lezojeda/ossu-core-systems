@@ -62,7 +62,13 @@ M=D
 0;JMP
 (Sys.init$ret.1)
 
-	// function Class1.set 0
+	
+
+
+
+
+
+// function Class1.set 0
 (Class1.set)
 
 
@@ -184,6 +190,8 @@ M=D
 A=M
 0;JMP
 
+
+
 // function Class1.get 0
 (Class1.get)
 
@@ -284,6 +292,12 @@ M=D
 @return_address
 A=M
 0;JMP
+
+
+
+
+
+
 // function Class2.set 0
 (Class2.set)
 
@@ -406,6 +420,8 @@ M=D
 A=M
 0;JMP
 
+
+
 // function Class2.get 0
 (Class2.get)
 
@@ -506,6 +522,14 @@ M=D
 @return_address
 A=M
 0;JMP
+
+
+
+
+
+
+
+
 // function Sys.init 0
 (Sys.init)
 
@@ -526,7 +550,7 @@ M=D
 M=M+1
 // call Class1.set 2
 // save the return address
-@Class1.set$ret.3
+@Class1.set$ret.11
 D=A
 @SP
 A=M
@@ -582,14 +606,14 @@ M=D
 // go to execute the callee's code
 @Class1.set
 0;JMP
-(Class1.set$ret.3)
+(Class1.set$ret.11)
 
 // pop temp 0
 @5
 D=A
 @0
 D=D+A
-@addr_4
+@addr_12
 M=D
 // SP--
 @SP
@@ -597,7 +621,7 @@ M=M-1
 A=M
 D=M
 // RAM[addr] <- RAM[SP]
-@addr_4
+@addr_12
 A=M
 M=D
 @23
@@ -616,7 +640,7 @@ M=D
 M=M+1
 // call Class2.set 2
 // save the return address
-@Class2.set$ret.7
+@Class2.set$ret.15
 D=A
 @SP
 A=M
@@ -672,14 +696,14 @@ M=D
 // go to execute the callee's code
 @Class2.set
 0;JMP
-(Class2.set$ret.7)
+(Class2.set$ret.15)
 
 // pop temp 0
 @5
 D=A
 @0
 D=D+A
-@addr_8
+@addr_16
 M=D
 // SP--
 @SP
@@ -687,12 +711,12 @@ M=M-1
 A=M
 D=M
 // RAM[addr] <- RAM[SP]
-@addr_8
+@addr_16
 A=M
 M=D
 // call Class1.get 0
 // save the return address
-@Class1.get$ret.9
+@Class1.get$ret.17
 D=A
 @SP
 A=M
@@ -748,11 +772,11 @@ M=D
 // go to execute the callee's code
 @Class1.get
 0;JMP
-(Class1.get$ret.9)
+(Class1.get$ret.17)
 
 // call Class2.get 0
 // save the return address
-@Class2.get$ret.10
+@Class2.get$ret.18
 D=A
 @SP
 A=M
@@ -808,7 +832,7 @@ M=D
 // go to execute the callee's code
 @Class2.get
 0;JMP
-(Class2.get$ret.10)
+(Class2.get$ret.18)
 
 // label END
 (END)

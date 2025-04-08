@@ -1,0 +1,10 @@
+/** Initializes a new Conway's game of life and starts running it. */
+class Main {
+	function void main() {
+		var ConwayLifeGame game;
+		let game = ConwayLifeGame.new();
+		// do game.run();
+		do game.dispose();
+		return;
+	}
+} 

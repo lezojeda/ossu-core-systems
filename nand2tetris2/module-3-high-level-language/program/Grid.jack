@@ -1,0 +1,28 @@
+class Grid {
+	field int cellSize;
+
+	constructor Grid new() {
+		let cellSize = 8;
+		do drawGrid();
+		return this;
+	}
+
+	/** Draws the grid at initialization */
+	method void drawGrid() {
+		var int currentColumn, currentRow;
+		let currentColumn = 0;
+		let currentRow = 0;
+
+		while (~(currentColumn = 512)) {
+			do Screen.drawLine(currentColumn, 0, currentColumn, 256);
+			let currentColumn = currentColumn + cellSize;
+		}
+
+		while (~(currentRow = 256)) {
+			do Screen.drawLine(0, currentRow, 512, currentRow);
+			let currentRow = currentRow + cellSize;
+		}
+
+		return;
+	}
+}

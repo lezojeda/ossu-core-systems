@@ -18,3 +18,16 @@ Build a basic VM translator that handles a subset of the VM language: stack arit
 - VM implementation
 ### Project
 Complete the VM implementation started in module's 1 project by translatin the remaining commands of `label`, `function`, `goto`, `if` and `call`
+## Module 3: High-Level Language
+Introduces the Jack language, a simple language based on Java
+- procedural programming
+- object-based programming
+- classes, methods, functions, constructors
+- list processing
+- recursion
+- developing interactive applications
+- graphics optimization
+- ### Project
+- write an interactive program in Jack: A simple, Java-like, object-based programming
+language
+- the objective is to get acquainted with the Jack language for which a compiler is developed in the following module
