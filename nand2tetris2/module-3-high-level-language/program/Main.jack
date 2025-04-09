@@ -3,7 +3,7 @@ class Main {
 	function void main() {
 		var ConwayLifeGame game;
 		let game = ConwayLifeGame.new();
-		// do game.run();
+		do game.run();
 		do game.dispose();
 		return;
 	}

@@ -1,8 +1,12 @@
 class ConwayLifeGame {
 	field Grid grid;
+	field Selector selector;
+	field int direction; // the selectors's current direction: 
+	// 0=none, 1=up, 2=down, 3=left, 4=right
 
 	constructor ConwayLifeGame new() {
 		let grid = Grid.new();
+		let selector = Selector.new();
 		return this;
 	}
 
@@ -10,5 +14,53 @@ class ConwayLifeGame {
 	method void dispose() {
 		do Memory.deAlloc(this);
 		return;
+	}
+
+	/** Moves the selector in the current direction. */
+	method void moveSelector() {
+		if (direction = 1) { do selector.moveUp(); }
+		// if (direction = 2) { do selector.moveDown(); }
+		// if (direction = 3) { do selector.moveLeft(); }
+		// if (direction = 4) { do selector.moveRight(); }
+		do Sys.wait(5);  // delays the next movement
+		return;
+	 }
+
+	/** Runs the game: handles the user's inputs and moves the selector accordingly */
+	method void run() {
+		var char key;  // the key currently pressed by the user
+		var boolean exit;
+		let exit = false;
+		
+		while (~exit) {
+		   // waits for a key to be pressed
+		   while (key = 0) {
+			  let key = Keyboard.keyPressed();
+		   }
+
+		   if (key = 81)  { let exit = true; }     // q key
+		   if (key = 131) {
+			   let direction = 1;                  // up arrow
+			   do moveSelector();
+		   }
+		   if (key = 133) {
+			   let direction = 2;                  // down arrow
+			   do moveSelector();
+		   }
+		   if (key = 130) {
+			   let direction = 3;                  // left arrow
+			   do moveSelector();
+		   }
+		   if (key = 132) {
+			   let direction = 4;                  // right arrow
+			   do moveSelector();
+		   }
+	
+		   // waits for the key to be released
+		   while (~(key = 0)) {
+			  let key = Keyboard.keyPressed();
+		   }
+	   } // while
+	   return;
 	}
 }

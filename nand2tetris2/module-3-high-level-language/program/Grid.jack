@@ -1,28 +1,36 @@
 class Grid {
-	field int cellSize;
+	field int dummy; // TODO: temporary hotfix to avoid malloc 0 error
 
 	constructor Grid new() {
-		let cellSize = 8;
-		do drawGrid();
+		do draw();
 		return this;
 	}
 
 	/** Draws the grid at initialization */
-	method void drawGrid() {
+	method void draw() {
 		var int currentColumn, currentRow;
 		let currentColumn = 0;
 		let currentRow = 0;
 
 		while (~(currentColumn = 512)) {
 			do Screen.drawLine(currentColumn, 0, currentColumn, 256);
-			let currentColumn = currentColumn + cellSize;
+			let currentColumn = currentColumn + 8;
 		}
 
 		while (~(currentRow = 256)) {
 			do Screen.drawLine(0, currentRow, 512, currentRow);
-			let currentRow = currentRow + cellSize;
+			let currentRow = currentRow + 8;
 		}
 
 		return;
+	}
+
+	method void dispose() {
+		do Memory.deAlloc(this);
+		return;
+	}
+
+	function int getCellSize() {
+		return 8;
 	}
 }

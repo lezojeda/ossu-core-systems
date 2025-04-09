@@ -1,0 +1,47 @@
+class Selector {
+	// TODO: hide if game is running
+
+	field int x, y; // screen location of the selector top-left corner of this square
+	field int size; // length of this square, in pixels
+
+	constructor Selector new() {
+		let x = 258;
+		let y = 130;
+		let size = 4;
+		do draw();
+		return this;
+	}
+
+	method void draw() {
+		do Screen.setColor(true);
+		do Screen.drawRectangle(x, y, x + size, y + size);
+		return;
+	}
+
+	method void dispose() {
+		do Memory.deAlloc(this);
+		return;
+	}
+
+	//////////////////////////////////////////////////////////////////
+	// Create a method that draws a square at a given coordinate x/y of the grid we created of 32*64 filled or the selector to encapsulate logic and reuse later when squares move and live and die
+
+	// To determine the live/die loop of every square consider doing a first run where the next state is saved based on the current one and a second run to update each cell
+	// This because if everything is done in one run then the update of cell n might incorrectly update cell n+1 based on cell n new state, not the previous one
+
+
+	/** Moves the selector one cell up */
+	method void moveUp() {
+		var int cellSize;
+		let cellSize = Grid.getCellSize();
+
+		// Erases the cell in its current location
+		do Screen.setColor(false);
+		do Screen.drawRectangle(x, y, x + size, y + size);
+		let y = y - cellSize;
+		// Draws it one cell above
+		do Screen.setColor(true);
+		do Screen.drawRectangle(x, y, x + size, y + size);
+		return;
+	}
+}
