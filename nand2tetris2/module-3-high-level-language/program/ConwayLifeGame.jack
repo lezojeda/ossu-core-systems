@@ -19,9 +19,9 @@ class ConwayLifeGame {
 	/** Moves the selector in the current direction. */
 	method void moveSelector() {
 		if (direction = 1) { do selector.moveUp(); }
-		// if (direction = 2) { do selector.moveDown(); }
-		// if (direction = 3) { do selector.moveLeft(); }
-		// if (direction = 4) { do selector.moveRight(); }
+		if (direction = 2) { do selector.moveDown(); }
+		if (direction = 3) { do selector.moveLeft(); }
+		if (direction = 4) { do selector.moveRight(); }
 		do Sys.wait(5);  // delays the next movement
 		return;
 	 }

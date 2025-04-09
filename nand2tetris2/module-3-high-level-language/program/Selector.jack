@@ -44,4 +44,46 @@ class Selector {
 		do Screen.drawRectangle(x, y, x + size, y + size);
 		return;
 	}
+
+	method void moveRight() {
+		var int cellSize;
+		let cellSize = Grid.getCellSize();
+
+		// Erases the cell in its current location
+		do Screen.setColor(false);
+		do Screen.drawRectangle(x, y, x + size, y + size);
+		let x = x + cellSize;
+		// Draws it one cell to the right
+		do Screen.setColor(true);
+		do Screen.drawRectangle(x, y, x + size, y + size);
+		return;
+	}
+
+	method void moveDown() {
+		var int cellSize;
+		let cellSize = Grid.getCellSize();
+
+		// Erases the cell in its current location
+		do Screen.setColor(false);
+		do Screen.drawRectangle(x, y, x + size, y + size);
+		let y = y + cellSize;
+		// Draws it one cell above
+		do Screen.setColor(true);
+		do Screen.drawRectangle(x, y, x + size, y + size);
+		return;
+	}
+
+	method void moveLeft() {
+		var int cellSize;
+		let cellSize = Grid.getCellSize();
+
+		// Erases the cell in its current location
+		do Screen.setColor(false);
+		do Screen.drawRectangle(x, y, x + size, y + size);
+		let x = x - cellSize;
+		// Draws it one cell above
+		do Screen.setColor(true);
+		do Screen.drawRectangle(x, y, x + size, y + size);
+		return;
+	}
 }
