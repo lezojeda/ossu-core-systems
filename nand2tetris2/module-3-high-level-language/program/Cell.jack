@@ -1,17 +1,40 @@
 class Cell {
-	field int x;
-	field int y;
+	field int x, y;
 	field boolean isAlive;
 
-	constructor Cell new(int x, int y) {
-		let x = x;
-		let y = y;
+	constructor Cell new(int ax, int ay) {
+		let x = ax;
+		let y = ay;
 		let isAlive = false;
 		return this;
 	}
 
 	method void toggle() {
-		let isAlive = ~(isAlive);
+		if (isAlive) {
+			let isAlive = false;
+			do Screen.setColor(false);
+			do Screen.drawRectangle(x + 1, y + 1, x + 7, y + 7);
+		} else {
+			let isAlive = true;
+			do Screen.setColor(true);
+			do Screen.drawRectangle(x, y, x + 7, y + 7);
+		}
 		return;
 	}
+
+	method void draw() {
+		if (~(isAlive)) {
+			do Screen.setColor(false);
+			do Screen.drawRectangle(x + 1, y + 1, x + 6, y + 6);
+		} else {
+			do Screen.setColor(true);
+			do Screen.drawRectangle(x, y, x + 7, y + 7);
+		}
+		return;
+	}
+
+	method void dispose() {
+		do Memory.deAlloc(this);
+		return;
+	 }
 }

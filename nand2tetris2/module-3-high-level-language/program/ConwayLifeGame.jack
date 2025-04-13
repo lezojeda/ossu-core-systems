@@ -20,17 +20,24 @@ class ConwayLifeGame {
 
 	/** Moves the selector in the current direction. */
 	method void moveSelector() {
+		/** Fills or erases the cell in the current selector's location before moving */
+		var Cell cell;
+		let cell = cellGrid.getCell(selector.gety() / 8, selector.getx() / 8); // TODO: use cellSize instead of 8
+		do cell.draw();
+
 		if (direction = 1) { do selector.moveUp(); }
 		if (direction = 2) { do selector.moveDown(); }
 		if (direction = 3) { do selector.moveLeft(); }
 		if (direction = 4) { do selector.moveRight(); }
+ 
 		do Sys.wait(5);  // delays the next movement
 		return;
 	}
 
-	// !!!
 	method void toggleCurrentCell() {
-		// call Grid fill cell passing current Selector x and y
+		var Cell cell;
+		let cell = cellGrid.getCell(selector.gety() / 8, selector.getx() / 8); // TODO: use cellSize instead of 8
+		do cell.toggle();
 		return;
 	} 
 
@@ -47,7 +54,7 @@ class ConwayLifeGame {
 		   }
 
 		   if (key = 81)  { let exit = true; }     // q key
-		   if (key = 128) {						   // enter key
+		   if (key = 32 | key = 128) {						   // space bar or enter key
 				do toggleCurrentCell();
 		   }
 		   if (key = 131) {

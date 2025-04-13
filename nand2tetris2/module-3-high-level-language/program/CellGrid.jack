@@ -22,6 +22,12 @@ class CellGrid {
         return this;
     }
 
+	method Cell getCell(int row, int col) {
+		var int index;
+		let index = row * 64 + col;
+		return cells[index];
+	}
+	
     method void dispose() {
         do Memory.deAlloc(this);
         return;

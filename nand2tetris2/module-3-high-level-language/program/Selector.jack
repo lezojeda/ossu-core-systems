@@ -35,11 +35,8 @@ class Selector {
 		var int cellSize;
 		let cellSize = Grid.getCellSize();
 
-		// Erases the cell in its current location
-		do Screen.setColor(false);
-		do Screen.drawRectangle(x, y, x + size, y + size);
-		let y = y - cellSize;
 		// Draws it one cell above
+		let y = y - cellSize;
 		do Screen.setColor(true);
 		do Screen.drawRectangle(x, y, x + size, y + size);
 		return;
@@ -49,11 +46,8 @@ class Selector {
 		var int cellSize;
 		let cellSize = Grid.getCellSize();
 
-		// Erases the cell in its current location
-		do Screen.setColor(false);
-		do Screen.drawRectangle(x, y, x + size, y + size);
-		let x = x + cellSize;
 		// Draws it one cell to the right
+		let x = x + cellSize;
 		do Screen.setColor(true);
 		do Screen.drawRectangle(x, y, x + size, y + size);
 		return;
@@ -63,11 +57,8 @@ class Selector {
 		var int cellSize;
 		let cellSize = Grid.getCellSize();
 
-		// Erases the cell in its current location
-		do Screen.setColor(false);
-		do Screen.drawRectangle(x, y, x + size, y + size);
+		// Draws it one cell below
 		let y = y + cellSize;
-		// Draws it one cell above
 		do Screen.setColor(true);
 		do Screen.drawRectangle(x, y, x + size, y + size);
 		return;
@@ -77,19 +68,14 @@ class Selector {
 		var int cellSize;
 		let cellSize = Grid.getCellSize();
 
-		// Erases the cell in its current location
-		do Screen.setColor(false);
-		do Screen.drawRectangle(x, y, x + size, y + size);
+		// Draws it one cell to the left
 		let x = x - cellSize;
-		// Draws it one cell above
 		do Screen.setColor(true);
 		do Screen.drawRectangle(x, y, x + size, y + size);
 		return;
 	}
 
-	method void fillCell() {
-		do Screen.setColor(true);
-		do Screen.drawRectangle(x, y, x + size + 1, y + size + 1);
-		return;
-	}
+	method int getx() { return x; }
+
+	method int gety() { return y; }
 }
