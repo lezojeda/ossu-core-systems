@@ -1,0 +1,17 @@
+class Cell {
+	field int x;
+	field int y;
+	field boolean isAlive;
+
+	constructor Cell new(int x, int y) {
+		let x = x;
+		let y = y;
+		let isAlive = false;
+		return this;
+	}
+
+	method void toggle() {
+		let isAlive = ~(isAlive);
+		return;
+	}
+}

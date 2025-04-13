@@ -1,11 +1,13 @@
 class ConwayLifeGame {
 	field Grid grid;
+	field CellGrid cellGrid;
 	field Selector selector;
 	field int direction; // the selectors's current direction: 
 	// 0=none, 1=up, 2=down, 3=left, 4=right
 
 	constructor ConwayLifeGame new() {
 		let grid = Grid.new();
+		let cellGrid = CellGrid.new();
 		let selector = Selector.new();
 		return this;
 	}
@@ -24,7 +26,13 @@ class ConwayLifeGame {
 		if (direction = 4) { do selector.moveRight(); }
 		do Sys.wait(5);  // delays the next movement
 		return;
-	 }
+	}
+
+	// !!!
+	method void toggleCurrentCell() {
+		// call Grid fill cell passing current Selector x and y
+		return;
+	} 
 
 	/** Runs the game: handles the user's inputs and moves the selector accordingly */
 	method void run() {
@@ -39,6 +47,9 @@ class ConwayLifeGame {
 		   }
 
 		   if (key = 81)  { let exit = true; }     // q key
+		   if (key = 128) {						   // enter key
+				do toggleCurrentCell();
+		   }
 		   if (key = 131) {
 			   let direction = 1;                  // up arrow
 			   do moveSelector();

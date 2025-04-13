@@ -1,0 +1,29 @@
+class CellGrid {
+    field Array cells;
+
+    constructor CellGrid new() {
+        var int rowIndex, columnIndex, index;
+        var int rows, cols;
+        let rows = 32;
+        let cols = 64;
+        let cells = Array.new(rows * cols); // allocate flat array
+
+        let rowIndex = 0;
+        while (rowIndex < rows) {
+            let columnIndex = 0;
+            while (columnIndex < cols) {
+                let index = rowIndex * cols + columnIndex;
+                let cells[index] = Cell.new(columnIndex * 8, rowIndex * 8);
+                let columnIndex = columnIndex + 1;
+            }
+            let rowIndex = rowIndex + 1;
+        }
+
+        return this;
+    }
+
+    method void dispose() {
+        do Memory.deAlloc(this);
+        return;
+    }
+}
