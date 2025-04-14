@@ -20,7 +20,7 @@ class Grid {
 
 		while (~(currentRow = 256)) {
 			do Screen.drawLine(0, currentRow, 512, currentRow);
-			let currentRow = currentRow + 8; // todo: repace 8 with getCellSize
+			let currentRow = currentRow + 8; // todo: replace 8 with getCellSize
 		}
 
 		return;

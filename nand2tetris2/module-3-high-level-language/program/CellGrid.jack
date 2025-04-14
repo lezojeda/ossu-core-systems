@@ -27,7 +27,7 @@ class CellGrid {
 		let index = row * 64 + col;
 		return cells[index];
 	}
-	
+
     method void dispose() {
         do Memory.deAlloc(this);
         return;

@@ -1,4 +1,5 @@
 class ConwayLifeGame {
+	field boolean isPlaying;
 	field Grid grid;
 	field CellGrid cellGrid;
 	field Selector selector;
@@ -6,16 +7,11 @@ class ConwayLifeGame {
 	// 0=none, 1=up, 2=down, 3=left, 4=right
 
 	constructor ConwayLifeGame new() {
+		let isPlaying = false;
 		let grid = Grid.new();
 		let cellGrid = CellGrid.new();
 		let selector = Selector.new();
 		return this;
-	}
-
-	/** Disposes this game. */
-	method void dispose() {
-		do Memory.deAlloc(this);
-		return;
 	}
 
 	/** Moves the selector in the current direction. */
@@ -53,25 +49,39 @@ class ConwayLifeGame {
 			  let key = Keyboard.keyPressed();
 		   }
 
-		   if (key = 81)  { let exit = true; }     // q key
-		   if (key = 32 | key = 128) {						   // space bar or enter key
-				do toggleCurrentCell();
+		   // only listen to P or Q keys if game is running
+		   if (isPlaying) {
+				if (key = 81)  { let exit = true; }  // q key
+
+				if (key = 80 | key = 112) {          // P/p key, pause simulation
+					let isPlaying = false;
+			   }
 		   }
-		   if (key = 131) {
-			   let direction = 1;                  // up arrow
-			   do moveSelector();
-		   }
-		   if (key = 133) {
-			   let direction = 2;                  // down arrow
-			   do moveSelector();
-		   }
-		   if (key = 130) {
-			   let direction = 3;                  // left arrow
-			   do moveSelector();
-		   }
-		   if (key = 132) {
-			   let direction = 4;                  // right arrow
-			   do moveSelector();
+
+		   if (~(isPlaying)) {
+			   if (key = 81)  { let exit = true; }       // q key
+			   if (key = 128) {						     // enter key
+					do toggleCurrentCell();
+			   }
+			   if (key = 82 | key = 114) {             // R/r key, run simulation
+				let isPlaying = true;
+			   }
+			   if (key = 131) {
+				   let direction = 1;                  // up arrow
+				   do moveSelector();
+			   }
+			   if (key = 133) {
+				   let direction = 2;                  // down arrow
+				   do moveSelector();
+			   }
+			   if (key = 130) {
+				   let direction = 3;                  // left arrow
+				   do moveSelector();
+			   }
+			   if (key = 132) {
+				   let direction = 4;                  // right arrow
+				   do moveSelector();
+			   }
 		   }
 	
 		   // waits for the key to be released
@@ -80,5 +90,11 @@ class ConwayLifeGame {
 		   }
 	   } // while
 	   return;
+	}
+
+	/** Disposes this game. */
+	method void dispose() {
+		do Memory.deAlloc(this);
+		return;
 	}
 }
