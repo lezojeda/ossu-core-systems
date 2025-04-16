@@ -46,21 +46,26 @@ class ConwayLifeGame {
 		while (~exit) {
 		   // waits for a key to be pressed
 		   while (key = 0) {
-			  let key = Keyboard.keyPressed();
+			  	let key = Keyboard.keyPressed();
+
+				if (isPlaying) {
+					// check game state by looping over cells
+					do cellGrid.calculateNextState();
+					do cellGrid.applyNextState();
+				}
 		   }
+
+		   if (key = 81) { let exit = true; } // q key
 
 		   // only listen to P or Q keys if game is running
 		   if (isPlaying) {
-				if (key = 81)  { let exit = true; }  // q key
-
-				if (key = 80 | key = 112) {          // P/p key, pause simulation
+				if (key = 80 | key = 112) {            // P/p key, pause simulation
 					let isPlaying = false;
-			   }
-		   }
+				   }
+			}
 
 		   if (~(isPlaying)) {
-			   if (key = 81)  { let exit = true; }       // q key
-			   if (key = 128) {						     // enter key
+			   if (key = 128) {						   // enter key
 					do toggleCurrentCell();
 			   }
 			   if (key = 82 | key = 114) {             // R/r key, run simulation

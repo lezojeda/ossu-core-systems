@@ -19,11 +19,6 @@ class Selector {
 	}
 
 	//////////////////////////////////////////////////////////////////
-	// Create a method that draws a square at a given coordinate x/y of the grid we created of 32*64 filled or the selector to encapsulate logic and reuse later when squares move and live and die
-
-	// To determine the live/die loop of every square consider doing a first run where the next state is saved based on the current one and a second run to update each cell
-	// This because if everything is done in one run then the update of cell n might incorrectly update cell n+1 based on cell n new state, not the previous one
-
 
 	/** Moves the selector one cell up */
 	method void moveUp() {

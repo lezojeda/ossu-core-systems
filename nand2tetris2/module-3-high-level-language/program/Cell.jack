@@ -12,20 +12,17 @@ class Cell {
 	method void toggle() {
 		if (isAlive) {
 			let isAlive = false;
-			do Screen.setColor(false);
-			do Screen.drawRectangle(x + 1, y + 1, x + 7, y + 7);
 		} else {
 			let isAlive = true;
-			do Screen.setColor(true);
-			do Screen.drawRectangle(x, y, x + 7, y + 7);
 		}
+		do draw(); // smell but can fix later
 		return;
 	}
 
 	method void draw() {
 		if (~(isAlive)) {
 			do Screen.setColor(false);
-			do Screen.drawRectangle(x + 1, y + 1, x + 6, y + 6);
+			do Screen.drawRectangle(x + 1, y + 1, x + 7, y + 7);
 		} else {
 			do Screen.setColor(true);
 			do Screen.drawRectangle(x, y, x + 7, y + 7);
@@ -33,8 +30,16 @@ class Cell {
 		return;
 	}
 
+	method int getIsAlive() { return isAlive; }
+
+	method void setIsAlive(boolean state) {
+		let isAlive = state;
+		do draw();
+		return;
+	}	
+
 	method void dispose() {
 		do Memory.deAlloc(this);
 		return;
-	 }
+	}
 }

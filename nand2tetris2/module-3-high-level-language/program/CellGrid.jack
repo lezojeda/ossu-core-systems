@@ -1,12 +1,17 @@
 class CellGrid {
     field Array cells;
+	field Array nextState;
+	field int rows;
+	field int cols;
+    field Array tempNeighbors; // used to calculate living neighbors
 
     constructor CellGrid new() {
         var int rowIndex, columnIndex, index;
-        var int rows, cols;
         let rows = 32;
         let cols = 64;
         let cells = Array.new(rows * cols); // allocate flat array
+		let nextState = Array.new(rows * cols);
+        let tempNeighbors = Array.new(8);
 
         let rowIndex = 0;
         while (rowIndex < rows) {
@@ -26,7 +31,119 @@ class CellGrid {
 		var int index;
 		let index = row * 64 + col;
 		return cells[index];
+	} 
+
+	method void calculateNextState() {
+		var int index, liveNeighbors, temp;
+		let index = 0;
+        let temp = rows * cols;
+
+		while (index < temp) {
+			let liveNeighbors = countLiveNeighbors(index);
+            if (liveNeighbors < 2) {
+                let nextState[index] = false;
+            } else {
+                let nextState[index] = true;
+            }
+
+			let index = index + 1;
+		}
+		return;
 	}
+
+    method void applyNextState() {
+        var int index, temp;
+        var Cell currentCell;
+        var boolean newState;
+
+		let index = 0;
+        let temp = rows * cols;
+		while (index < temp) {
+			let currentCell = cells[index];
+            let newState = nextState[index];
+
+            do currentCell.setIsAlive(newState);
+
+			let index = index + 1;
+		}
+		return;
+	}
+
+    method int countLiveNeighbors(int cellIndex) {
+        var int aliveCount, neighborIndex, index;
+        var Array neighborIndexes;
+        var Cell currentNeighbor;
+        
+        let aliveCount = 0;
+        let neighborIndexes = getNeighborIndexes(cellIndex);
+        let index = 0;
+        
+        while (index < 8) {
+            let neighborIndex = neighborIndexes[index];
+            if (~(neighborIndex < 0)) {
+                let currentNeighbor = cells[neighborIndex];
+                if (currentNeighbor.getIsAlive()) {
+                    let aliveCount = aliveCount + 1;
+                }
+            }
+            let index = index + 1;
+        }
+        
+        return aliveCount;
+    }
+
+	method int getNeighborIndexes(int cellIndex) {
+        var Array neighbors;
+        var int row, col, deltaRow, deltaCol, WIDTH, HEIGHT;
+        var int newRow, newCol, newIndex;
+        var int count;
+        let neighbors = tempNeighbors;
+
+        let WIDTH = 64;
+        let HEIGHT = 32;
+        let row = cellIndex / WIDTH;
+        let col = cellIndex - (row * WIDTH);
+        let count = 0;
+
+        let deltaRow = -1;
+        while (~(deltaRow > 1)) {
+            let deltaCol = -1;
+            while (~(deltaCol > 1)) {
+                if (~((deltaRow = 0) & (deltaCol = 0))) { // skip self
+                    let newRow = row + deltaRow;
+                    let newCol = col + deltaCol;
+
+                    if ((~(newRow < 0)) & (newRow < HEIGHT) & (~(newCol < 0)) & (newCol < WIDTH)) {
+                        let newIndex = (newRow * WIDTH) + newCol;
+                        let neighbors[count] = newIndex;
+                        let count = count + 1;
+                    }
+                }
+                let deltaCol = deltaCol + 1;
+            }
+            let deltaRow = deltaRow + 1;
+        }
+
+        return neighbors;
+	}
+
+    method void draw() {
+        var int rowIndex, columnIndex, index;
+        var Cell currentCell;
+        
+        let rowIndex = 0;
+        while (rowIndex < rows) {
+          let columnIndex = 0;
+          while (columnIndex < cols) {
+            let index = rowIndex * cols + columnIndex;
+            let currentCell = cells[index];
+            do currentCell.draw();
+            let columnIndex = columnIndex + 1;
+          }
+          let rowIndex = rowIndex + 1;
+        }
+        return;
+    }
 
     method void dispose() {
         do Memory.deAlloc(this);
