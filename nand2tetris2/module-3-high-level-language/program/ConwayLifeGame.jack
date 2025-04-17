@@ -8,7 +8,7 @@ class ConwayLifeGame {
 	// 0=none, 1=up, 2=down, 3=left, 4=right
 
 	constructor ConwayLifeGame new() {
-		let cellSize = 32;
+		let cellSize = 16;
 
 		let isPlaying = false;
 		let grid = Grid.new(cellSize);
@@ -57,8 +57,8 @@ class ConwayLifeGame {
 
 				if (isPlaying) {
 					// check game state by looping over cells
-					// do cellGrid.calculateNextState();
-					// do cellGrid.applyNextState();
+					do cellGrid.calculateNextState();
+					do cellGrid.applyNextState();
 				}
 		   }
 
