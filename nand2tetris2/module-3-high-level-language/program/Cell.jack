@@ -1,10 +1,14 @@
 class Cell {
 	field int x, y;
 	field boolean isAlive;
+	field int cellSize;
 
-	constructor Cell new(int ax, int ay) {
+	constructor Cell new(int ax, int ay, int aCellSize) {
+		// graphical coordinates, used for drawing
 		let x = ax;
 		let y = ay;
+
+		let cellSize = aCellSize;
 		let isAlive = false;
 		return this;
 	}
@@ -22,10 +26,10 @@ class Cell {
 	method void draw() {
 		if (~(isAlive)) {
 			do Screen.setColor(false);
-			do Screen.drawRectangle(x + 1, y + 1, x + 7, y + 7);
+			do Screen.drawRectangle(x + 1, y + 1, x + cellSize - 1, y + cellSize - 1);
 		} else {
 			do Screen.setColor(true);
-			do Screen.drawRectangle(x, y, x + 7, y + 7);
+			do Screen.drawRectangle(x, y, x + cellSize, y + cellSize);
 		}
 		return;
 	}

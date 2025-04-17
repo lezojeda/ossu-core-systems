@@ -3,14 +3,17 @@ class ConwayLifeGame {
 	field Grid grid;
 	field CellGrid cellGrid;
 	field Selector selector;
+	field int cellSize;
 	field int direction; // the selectors's current direction: 
 	// 0=none, 1=up, 2=down, 3=left, 4=right
 
 	constructor ConwayLifeGame new() {
+		let cellSize = 32;
+
 		let isPlaying = false;
-		let grid = Grid.new();
-		let cellGrid = CellGrid.new();
-		let selector = Selector.new();
+		let grid = Grid.new(cellSize);
+		let cellGrid = CellGrid.new(cellSize);
+		let selector = Selector.new(cellSize);
 		return this;
 	}
 
@@ -18,7 +21,11 @@ class ConwayLifeGame {
 	method void moveSelector() {
 		/** Fills or erases the cell in the current selector's location before moving */
 		var Cell cell;
-		let cell = cellGrid.getCell(selector.gety() / 8, selector.getx() / 8); // TODO: use cellSize instead of 8
+		var int x, y;
+		let x = selector.getx();
+		let y = selector.gety();
+
+		let cell = cellGrid.getCell(y / cellSize, x / cellSize);
 		do cell.draw();
 
 		if (direction = 1) { do selector.moveUp(); }
@@ -32,7 +39,7 @@ class ConwayLifeGame {
 
 	method void toggleCurrentCell() {
 		var Cell cell;
-		let cell = cellGrid.getCell(selector.gety() / 8, selector.getx() / 8); // TODO: use cellSize instead of 8
+		let cell = cellGrid.getCell(selector.gety() / cellSize, selector.getx() / cellSize);
 		do cell.toggle();
 		return;
 	} 
@@ -50,8 +57,8 @@ class ConwayLifeGame {
 
 				if (isPlaying) {
 					// check game state by looping over cells
-					do cellGrid.calculateNextState();
-					do cellGrid.applyNextState();
+					// do cellGrid.calculateNextState();
+					// do cellGrid.applyNextState();
 				}
 		   }
 

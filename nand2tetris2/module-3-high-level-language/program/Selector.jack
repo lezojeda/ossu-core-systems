@@ -3,11 +3,13 @@ class Selector {
 
 	field int x, y; // screen location of the selector top-left corner of this square
 	field int size; // length of this square, in pixels
+    field int cellSize;
 
-	constructor Selector new() {
+	constructor Selector new(int aCellSize) {
 		let x = 258;
 		let y = 130;
-		let size = 4;
+		let cellSize = aCellSize;
+		let size = (aCellSize * 3) / 4;
 		do draw();
 		return this;
 	}
@@ -18,13 +20,8 @@ class Selector {
 		return;
 	}
 
-	//////////////////////////////////////////////////////////////////
-
 	/** Moves the selector one cell up */
 	method void moveUp() {
-		var int cellSize;
-		let cellSize = Grid.getCellSize();
-
 		// Draws it one cell above
 		let y = y - cellSize;
 		do Screen.setColor(true);
@@ -33,9 +30,6 @@ class Selector {
 	}
 
 	method void moveRight() {
-		var int cellSize;
-		let cellSize = Grid.getCellSize();
-
 		// Draws it one cell to the right
 		let x = x + cellSize;
 		do Screen.setColor(true);
@@ -44,9 +38,6 @@ class Selector {
 	}
 
 	method void moveDown() {
-		var int cellSize;
-		let cellSize = Grid.getCellSize();
-
 		// Draws it one cell below
 		let y = y + cellSize;
 		do Screen.setColor(true);
@@ -55,9 +46,6 @@ class Selector {
 	}
 
 	method void moveLeft() {
-		var int cellSize;
-		let cellSize = Grid.getCellSize();
-
 		// Draws it one cell to the left
 		let x = x - cellSize;
 		do Screen.setColor(true);

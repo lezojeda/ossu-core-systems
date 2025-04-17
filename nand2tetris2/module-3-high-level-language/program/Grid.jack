@@ -2,25 +2,25 @@
 class Grid {
 	field int dummy; // TODO: temporary hotfix to avoid malloc 0 error
 
-	constructor Grid new() {
-		do draw();
+	constructor Grid new(int cellSize) {
+		do draw(cellSize);
 		return this;
 	}
 
 	/** Draws the grid at initialization */
-	method void draw() {
+	method void draw(int cellSize) {
 		var int currentColumn, currentRow;
 		let currentColumn = 0;
 		let currentRow = 0;
 
 		while (~(currentColumn = 512)) {
 			do Screen.drawLine(currentColumn, 0, currentColumn, 256);
-			let currentColumn = currentColumn + 8;
+			let currentColumn = currentColumn + cellSize;
 		}
 
 		while (~(currentRow = 256)) {
 			do Screen.drawLine(0, currentRow, 512, currentRow);
-			let currentRow = currentRow + 8; // todo: replace 8 with getCellSize
+			let currentRow = currentRow + cellSize;
 		}
 
 		return;
@@ -29,9 +29,5 @@ class Grid {
 	method void dispose() {
 		do Memory.deAlloc(this);
 		return;
-	}
-
-	function int getCellSize() {
-		return 8;
 	}
 }

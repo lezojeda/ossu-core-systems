@@ -1,49 +1,72 @@
 class CellGrid {
     field Array cells;
 	field Array nextState;
-	field int rows;
-	field int cols;
+    field int rows;
+    field int cols;
+    field int cellCount;    
     field Array tempNeighbors; // used to calculate living neighbors
+    field int cellSize;
 
-    constructor CellGrid new() {
+    constructor CellGrid new(int aCellSize) {
         var int rowIndex, columnIndex, index;
-        let rows = 32;
-        let cols = 64;
-        let cells = Array.new(rows * cols); // allocate flat array
-		let nextState = Array.new(rows * cols);
-        let tempNeighbors = Array.new(8);
 
+        let cellSize = aCellSize;
+        let cols = 512 / aCellSize;
+        let rows = 256 / aCellSize;
+        let cellCount = rows * cols;
+    
+        let cells = Array.new(cellCount);
+        let nextState = Array.new(cellCount);
+        let tempNeighbors = Array.new(8);
+    
+        // Fill cells array
         let rowIndex = 0;
         while (rowIndex < rows) {
             let columnIndex = 0;
             while (columnIndex < cols) {
                 let index = rowIndex * cols + columnIndex;
-                let cells[index] = Cell.new(columnIndex * 8, rowIndex * 8);
+                let cells[index] = Cell.new(columnIndex * cellSize, rowIndex * cellSize, cellSize);
                 let columnIndex = columnIndex + 1;
             }
             let rowIndex = rowIndex + 1;
         }
-
+    
         return this;
     }
 
 	method Cell getCell(int row, int col) {
 		var int index;
-		let index = row * 64 + col;
+		let index = row * cols + col;
+
 		return cells[index];
 	} 
 
 	method void calculateNextState() {
-		var int index, liveNeighbors, temp;
+		var int index, liveNeighbors, end;
+        var Cell currentCell;
+        var boolean isCurrentCellAlive;
 		let index = 0;
-        let temp = rows * cols;
+        let end = cellCount;
 
-		while (index < temp) {
+		while (index < end) {
 			let liveNeighbors = countLiveNeighbors(index);
-            if (liveNeighbors < 2) {
-                let nextState[index] = false;
+
+            // GAME OF LIFE RULES
+
+            let currentCell = cells[index];
+            let isCurrentCellAlive = currentCell.getIsAlive();
+            if (isCurrentCellAlive) {
+                if (liveNeighbors < 2 | liveNeighbors > 3) {
+                    let nextState[index] = false;
+                } else {
+                    let nextState[index] = true;
+                }
             } else {
-                let nextState[index] = true;
+                if (liveNeighbors = 3) {
+                    let nextState[index] = true;
+                } else {
+                    let nextState[index] = false;
+                }
             }
 
 			let index = index + 1;
@@ -52,13 +75,13 @@ class CellGrid {
 	}
 
     method void applyNextState() {
-        var int index, temp;
+        var int index, end;
         var Cell currentCell;
         var boolean newState;
 
 		let index = 0;
-        let temp = rows * cols;
-		while (index < temp) {
+        let end = cellCount;
+		while (index < end) {
 			let currentCell = cells[index];
             let newState = nextState[index];
 
@@ -80,7 +103,7 @@ class CellGrid {
         
         while (index < 8) {
             let neighborIndex = neighborIndexes[index];
-            if (~(neighborIndex < 0)) {
+            if (~(neighborIndex < 0)) { // skip invalid indexes
                 let currentNeighbor = cells[neighborIndex];
                 if (currentNeighbor.getIsAlive()) {
                     let aliveCount = aliveCount + 1;
@@ -92,57 +115,78 @@ class CellGrid {
         return aliveCount;
     }
 
-	method int getNeighborIndexes(int cellIndex) {
-        var Array neighbors;
-        var int row, col, deltaRow, deltaCol, WIDTH, HEIGHT;
-        var int newRow, newCol, newIndex;
-        var int count;
-        let neighbors = tempNeighbors;
 
+    method Array getNeighborIndexes(int cellIndex) {
+        var Array neighbors;
+        var int row, col, WIDTH, HEIGHT;
+        var int neighborCount;
+        
+        let neighbors = tempNeighbors;
         let WIDTH = 64;
         let HEIGHT = 32;
         let row = cellIndex / WIDTH;
         let col = cellIndex - (row * WIDTH);
-        let count = 0;
-
-        let deltaRow = -1;
-        while (~(deltaRow > 1)) {
-            let deltaCol = -1;
-            while (~(deltaCol > 1)) {
-                if (~((deltaRow = 0) & (deltaCol = 0))) { // skip self
-                    let newRow = row + deltaRow;
-                    let newCol = col + deltaCol;
-
-                    if ((~(newRow < 0)) & (newRow < HEIGHT) & (~(newCol < 0)) & (newCol < WIDTH)) {
-                        let newIndex = (newRow * WIDTH) + newCol;
-                        let neighbors[count] = newIndex;
-                        let count = count + 1;
-                    }
-                }
-                let deltaCol = deltaCol + 1;
-            }
-            let deltaRow = deltaRow + 1;
-        }
-
-        return neighbors;
-	}
-
-    method void draw() {
-        var int rowIndex, columnIndex, index;
-        var Cell currentCell;
+        let neighborCount = 0;
         
-        let rowIndex = 0;
-        while (rowIndex < rows) {
-          let columnIndex = 0;
-          while (columnIndex < cols) {
-            let index = rowIndex * cols + columnIndex;
-            let currentCell = cells[index];
-            do currentCell.draw();
-            let columnIndex = columnIndex + 1;
-          }
-          let rowIndex = rowIndex + 1;
+        // Initialize all neighbor slots to -1 (invalid)
+        let neighbors[0] = -1;
+        let neighbors[1] = -1;
+        let neighbors[2] = -1;
+        let neighbors[3] = -1;
+        let neighbors[4] = -1;
+        let neighbors[5] = -1;
+        let neighbors[6] = -1;
+        let neighbors[7] = -1;
+        
+        // Top-left
+        if ((~(row < 1)) & (~(col < 1))) {
+            let neighbors[neighborCount] = ((row-1) * WIDTH) + (col-1);
+            let neighborCount = neighborCount + 1;
         }
-        return;
+        
+        // Top
+        if (~(row < 1)) {
+            let neighbors[neighborCount] = ((row-1) * WIDTH) + col;
+            let neighborCount = neighborCount + 1;
+        }
+        
+        // Top-right
+        if ((~(row < 1)) & (col < (WIDTH-1))) {
+            let neighbors[neighborCount] = ((row-1) * WIDTH) + (col+1);
+            let neighborCount = neighborCount + 1;
+        }
+        
+        // Left
+        if (~(col < 1)) {
+            let neighbors[neighborCount] = (row * WIDTH) + (col-1);
+            let neighborCount = neighborCount + 1;
+        }
+        
+        // Right
+        if (col < (WIDTH-1)) {
+            let neighbors[neighborCount] = (row * WIDTH) + (col+1);
+            let neighborCount = neighborCount + 1;
+        }
+        
+        // Bottom-left
+        if ((row < (HEIGHT-1)) & (~(col < 1))) {
+            let neighbors[neighborCount] = ((row+1) * WIDTH) + (col-1);
+            let neighborCount = neighborCount + 1;
+        }
+        
+        // Bottom
+        if (row < (HEIGHT-1)) {
+            let neighbors[neighborCount] = ((row+1) * WIDTH) + col;
+            let neighborCount = neighborCount + 1;
+        }
+        
+        // Bottom-right
+        if ((row < (HEIGHT-1)) & (col < (WIDTH-1))) {
+            let neighbors[neighborCount] = ((row+1) * WIDTH) + (col+1);
+            let neighborCount = neighborCount + 1;
+        }
+        
+        return neighbors;
     }
 
     method void dispose() {
