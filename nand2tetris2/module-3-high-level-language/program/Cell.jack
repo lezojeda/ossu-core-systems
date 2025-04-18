@@ -1,3 +1,4 @@
+/** Each living or dead cell in the CellGrid with x and y coordinates */
 class Cell {
 	field int x, y;
 	field boolean isAlive;

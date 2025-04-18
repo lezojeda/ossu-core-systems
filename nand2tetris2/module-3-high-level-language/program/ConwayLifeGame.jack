@@ -1,9 +1,9 @@
 class ConwayLifeGame {
+	field int cellSize;
 	field boolean isPlaying;
 	field Grid grid;
 	field CellGrid cellGrid;
 	field Selector selector;
-	field int cellSize;
 	field int direction; // the selectors's current direction: 
 	// 0=none, 1=up, 2=down, 3=left, 4=right
 
@@ -38,6 +38,7 @@ class ConwayLifeGame {
 	}
 
 	method void toggleCurrentCell() {
+		/** Toggles the current cell that matches the x and y of the selector */
 		var Cell cell;
 		let cell = cellGrid.getCell(selector.gety() / cellSize, selector.getx() / cellSize);
 		do cell.toggle();

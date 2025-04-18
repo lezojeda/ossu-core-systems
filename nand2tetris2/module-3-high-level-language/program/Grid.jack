@@ -1,6 +1,6 @@
 /** The graphical grid in the screen */
 class Grid {
-	field int dummy; // TODO: temporary hotfix to avoid malloc 0 error
+	field int dummy; // can't have classes without field because of malloc 0 error
 
 	constructor Grid new(int cellSize) {
 		do draw(cellSize);

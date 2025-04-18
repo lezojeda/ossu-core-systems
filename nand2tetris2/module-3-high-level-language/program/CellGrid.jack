@@ -1,15 +1,14 @@
+/** The grid of cells storing the living state of each one */
 class CellGrid {
-    field Array cells;
-	field Array nextState;
-    field int rows;
-    field int cols;
-    field int cellCount;    
-    field Array tempNeighbors; // used to calculate living neighbors
     field int cellSize;
+    field int cols;
+    field int rows;
+    field int cellCount;    
+    field Array cells;
+    field Array nextState;
+    field Array tempNeighbors; // used to calculate living neighbors
 
     constructor CellGrid new(int aCellSize) {
-        var int rowIndex, columnIndex, index;
-
         let cellSize = aCellSize;
         let cols = 512 / aCellSize;
         let rows = 256 / aCellSize;
@@ -19,6 +18,13 @@ class CellGrid {
         let nextState = Array.new(cellCount);
         let tempNeighbors = Array.new(8);
     
+        do initCells();
+    
+        return this;
+    }
+
+    method void initCells() {
+        var int rowIndex, columnIndex, index;
         // Fill cells array
         let rowIndex = 0;
         while (rowIndex < rows) {
@@ -30,8 +36,7 @@ class CellGrid {
             }
             let rowIndex = rowIndex + 1;
         }
-    
-        return this;
+        return;
     }
 
 	method Cell getCell(int row, int col) {
@@ -45,8 +50,8 @@ class CellGrid {
 		var int index, liveNeighbors;
         var Cell currentCell;
         var boolean isCurrentCellAlive;
-		let index = 0;
 
+		let index = 0;
 		while (index < cellCount) {
 			let liveNeighbors = countLiveNeighbors(index);
 

@@ -2,8 +2,8 @@ class Selector {
 	// TODO: hide if game is running
 
 	field int x, y; // screen location of the selector top-left corner of this square
-	field int size; // length of this square, in pixels
     field int cellSize;
+	field int size; // length of this square, in pixels
 
 	constructor Selector new(int aCellSize) {
 		let x = 258;
