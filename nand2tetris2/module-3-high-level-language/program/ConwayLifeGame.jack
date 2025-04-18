@@ -10,9 +10,9 @@ class ConwayLifeGame {
 	constructor ConwayLifeGame new() {
 		/** 
      	* Creates a new CellGrid with a valid cell size.
-     	* The cell size must be one of: 8, 16, 32, 64, or 128 to fit grid constraints.
+     	* The cell size must be one of: 8, 16, 32 or 64 to fit grid constraints.
      	*/
-		let cellSize = 16;
+		let cellSize = 128;
 
 		let isPlaying = false;
 		let grid = Grid.new(cellSize);
