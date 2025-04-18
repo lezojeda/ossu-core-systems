@@ -25,7 +25,7 @@ Introduces the Jack language, a simple language based on Java
 - recursion
 - developing interactive applications
 - graphics optimization
-- ### Project
+### Project
 For this project I wrote the Conway's Game of life, which can be found [here](https://github.com/lezojeda/ossu-core-systems/blob/master/nand2tetris2/module-3-high-level-language/program/README.md). The objectives were:
 - write an interactive program in Jack: A simple, Java-like, object-based programming
 language
