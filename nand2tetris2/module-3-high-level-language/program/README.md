@@ -1,5 +1,7 @@
 # Conway's Game of Life in Jack
 
+[Preview in Youtube](https://www.youtube.com/watch?v=7qTTqfcPL-c)
+
 This program is an implementation of [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life), written in the Jack programming language for this module's project.
 
 It simulates a cellular automaton where cells on a grid evolve based on simple rules, creating complex patterns over time.
