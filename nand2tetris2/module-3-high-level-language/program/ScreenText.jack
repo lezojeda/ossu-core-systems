@@ -1,0 +1,34 @@
+class ScreenText {
+    // This module holds the previous string so it knows how much space to clear
+    static String previous;
+
+    /** Writes the given string at a fixed location, clearing any previous content */
+    function void write(String s) {
+        var int i, length;
+        var char space;
+
+        // Move to fixed coordinates
+        do Output.moveCursor(0, 0);
+
+        // If something was previously written, erase it
+        if (~(previous = null)) {
+            let i = 0;
+            let space = 16;
+            while (i < previous.length()) {
+                do Output.printChar(space);
+                let i = i + 1;
+            }
+        }
+
+        // Move cursor back again
+        do Output.moveCursor(0, 0);
+
+        // Print the new string
+        do Output.printString(s);
+
+        // Store it as the previous
+        let previous = s;
+
+        return;
+    }
+}

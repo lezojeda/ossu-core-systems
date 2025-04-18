@@ -8,7 +8,7 @@ class ConwayLifeGame {
 	// 0=none, 1=up, 2=down, 3=left, 4=right
 
 	constructor ConwayLifeGame new() {
-		let cellSize = 16;
+		let cellSize = 32;
 
 		let isPlaying = false;
 		let grid = Grid.new(cellSize);
@@ -22,20 +22,35 @@ class ConwayLifeGame {
 		/** Fills or erases the cell in the current selector's location before moving */
 		var Cell cell;
 		var int x, y;
+	
 		let x = selector.getx();
 		let y = selector.gety();
-
+	
 		let cell = cellGrid.getCell(y / cellSize, x / cellSize);
-		do cell.draw();
-
-		if (direction = 1) { do selector.moveUp(); }
-		if (direction = 2) { do selector.moveDown(); }
-		if (direction = 3) { do selector.moveLeft(); }
-		if (direction = 4) { do selector.moveRight(); }
- 
+	
+		if (direction = 1 & (~(y < cellSize))) { // up
+			do cell.draw();
+			do selector.moveUp();
+		}
+	
+		if (direction = 2 & (~((y + cellSize + selector.getsize()) > 256))) { // down
+			do cell.draw();
+			do selector.moveDown();
+		}
+	
+		if (direction = 3 & (~(x < cellSize))) { // left
+			do cell.draw();
+			do selector.moveLeft();
+		}
+	
+		if (direction = 4 & (~((x + cellSize + selector.getsize()) > 512))) { // right
+			do cell.draw();
+			do selector.moveRight();
+		}
+	
 		do Sys.wait(5);  // delays the next movement
 		return;
-	}
+	}	
 
 	method void toggleCurrentCell() {
 		/** Toggles the current cell that matches the x and y of the selector */
@@ -65,10 +80,12 @@ class ConwayLifeGame {
 
 		   if (key = 81) { let exit = true; } // q key
 
-		   // only listen to P or Q keys if game is running
+		   // only listen to pause keys if game is running
 		   if (isPlaying) {
 				if (key = 80 | key = 112) {            // P/p key, pause simulation
 					let isPlaying = false;
+					do selector.draw(); // redraws the selector
+					do ScreenText.write("paused");
 				   }
 			}
 
@@ -77,6 +94,7 @@ class ConwayLifeGame {
 					do toggleCurrentCell();
 			   }
 			   if (key = 82 | key = 114) {             // R/r key, run simulation
+				do ScreenText.write("game running");
 				let isPlaying = true;
 			   }
 			   if (key = 131) {
