@@ -12,7 +12,10 @@ It simulates a cellular automaton where cells on a grid evolve based on simple r
   - **`Selector`**: Allows the user to select and toggle individual cells before starting the simulation using the keyboard arrow keys and R or P to run or pause the simulation respectively.
  - **`CellGrid`**: Manages the grid of cells. It handles the initialization of cells, calculates the next state of the grid based on the Game of Life rules, and applies the new state to the cells.
 - **`Cell`**: Represents an individual cell in the grid. Each cell has an `isAlive` state and knows how to toggle its state and draw itself on the screen.
-- **`ScreenText`**: Displays messages on the screen, such as "paused" or "game running." An abstraction over the Jack out of the box `Screen` and `String` classes to write and erase a text in the top left of the screen. 
+- **`ScreenText`**: Displays messages on the screen, such as "paused" or "game running." An abstraction over the Jack out of the box `Screen` and `String` classes to write and erase a text in the top left of the screen.
+
+## Cell size
+The cell size is controlled through the `cellSize` field in the `ConwayLifeGame` class. The amount of rows, cols and hence cells are derived from it. Due to the VM emulator constraints and a heap overflow the minimum size is 8 with a default of 16.
 
 ## Rules of the Game
 
