@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "VM Translator Debug",
+            "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v20.15.1/bin/node",
+            "program": "${workspaceFolder}/JackAnalyzer.js",
+            "args": ["./ArrayTest/Main.jack"],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

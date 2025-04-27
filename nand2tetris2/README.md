@@ -30,3 +30,11 @@ For this project I wrote the Conway's Game of life, which can be found [here](ht
 - write an interactive program in Jack: A simple, Java-like, object-based programming
 language
 - the objective is to get acquainted with the Jack language for which a compiler is developed in the following module
+## Module 4: Compiler I
+- tokenizing
+- grammars
+- parsing
+- parse trees
+- XML/mark-up
+- compilation
+- 

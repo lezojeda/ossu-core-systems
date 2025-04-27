@@ -3,15 +3,15 @@ const { translateCommand, writeBootstrapCode } = require("./src/codeWriter");
 const fs = require("fs");
 const path = require("path");
 
-const inputPath = process.argv[2];
+const source = process.argv[2];
 
-if (!inputPath) {
+if (!source) {
 	console.error("Input parameter missing. Usage: node VMtranslator.js <inputPath>");
 	process.exit(1);
 }
 
-if (fs.lstatSync(inputPath).isDirectory()) {
-	fs.readdir(inputPath, (err, files) => {
+if (fs.lstatSync(source).isDirectory()) {
+	fs.readdir(source, (err, files) => {
 		if (err) {
 			console.error("Could not list the directory.", err);
 			process.exit(1);
@@ -22,17 +22,17 @@ if (fs.lstatSync(inputPath).isDirectory()) {
 		files.forEach(file => {
 			if (path.extname(file) !== ".vm") return;
 
-			const fullPath = path.join(inputPath, file);
+			const fullPath = path.join(source, file);
 			const fileBaseName = path.basename(file, ".vm");
 
 			finalAsmCode += translateVMfile(fullPath, fileBaseName);
 		});
 
-		fs.writeFileSync(path.join(inputPath, "final.asm"), finalAsmCode);
+		fs.writeFileSync(path.join(source, "final.asm"), finalAsmCode);
 	});
 } else {
-	const filename = inputPath.replace(".vm", ".asm");
-	const data = translateVMfile(inputPath, path.basename(inputPath, ".vm"));
+	const filename = source.replace(".vm", ".asm");
+	const data = translateVMfile(source, path.basename(source, ".vm"));
 	fs.writeFileSync(filename, data);
 }
 
