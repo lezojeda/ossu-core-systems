@@ -1,5 +1,6 @@
 const fs = require("fs");
 const symbols = require("./symbols");
+const keywords = require("./keywords");
 
 /**
  * Removes all comments and white space from the input stream and breaks it into Jack-language tokens.
@@ -8,30 +9,28 @@ const symbols = require("./symbols");
  */
 function tokenize(source) {
 	const content = fs.readFileSync(source, "utf8");
-	const cleanContents = removeCommentsAndWhitespace(content);
+	const cleanContents = removeComments(content);
 	const tokens = [];
+
 	let pointer = 0;
 	let currentToken = "";
 
 	while (pointer <= cleanContents.length - 1) {
-		let currentChar = cleanContents[pointer];
-
-		/** symbol or digit */
-		if (isSymbol(currentChar) || isDigit(currentChar)) {
-			currentToken = currentChar;
-			pointer += 1;
-		} else if (currentChar === " ") {
-			// whitespace, move pointer to next position and add current token to tokens array
+		if (cleanContents[pointer] === " ") {
+			// whitespace, move pointer to next position
 			pointer += 1;
 		} else {
-			const result = extractStringOrIdentifier(cleanContents, pointer);
-			currentToken = result.value;
-			pointer += result.length;
-		}
+			const { value, length } = extractToken(cleanContents, pointer);
 
-		if (currentToken) {
+			currentToken = {
+				tokenType: cleanContents[pointer] === '"' ? "STRING_CONST" : getTokenType(value),
+				value,
+			};
+
 			tokens.push(currentToken);
-			currentToken = "";
+			currentToken = {};
+
+			pointer += length;
 		}
 	}
 
@@ -43,48 +42,91 @@ function tokenize(source) {
  * @param {string} content - Raw file content
  * @returns {string} Cleaned content with comments and newlines removed
  */
-function removeCommentsAndWhitespace(content) {
+function removeComments(content) {
 	return content
+		.replace(/\/\*[\s\S]*?\*\//g, "") // Remove /* multi-line */ comments
+		.replace(/\/\/.*$/gm, "") // Remove // single-line comments
 		.split("\n")
-		.map(line => line.split(/\/\/|\/\*\*/)[0].trim())
-		.filter(line => Boolean(line))
+		.map(line => line.trim())
+		.filter(line => line.length > 0)
 		.join("");
 }
 
 /**
- * Extracts either a string constant or identifier from the contents
+ * Extracts either a string constant, integer or identifier from the contents
  * @param {string} contents - The cleaned source content
  * @param {number} startPosition - Current position in the contents
  * @returns {{value: string, length: number}} Extracted token and length consumed
  */
-function extractStringOrIdentifier(contents, startPosition) {
-	const isStringConstant = contents[startPosition] === '"';
-	let currentPosition = startPosition;
-	let token = "";
+function extractToken(contents, startPosition) {
+	const currentChar = contents[startPosition];
+	const isStringConstant = currentChar === '"';
+	let pos = startPosition;
 
 	if (isStringConstant) {
-		currentPosition += 1; // Skip past the opening quote
-		while (currentPosition < contents.length && contents[currentPosition] !== '"') {
-			token += contents[currentPosition];
-			currentPosition++;
-		}
-		currentPosition += 1; // Skip past the closing quote
+		return extractStringConstant(contents, pos);
+	} else if (isSymbol(currentChar)) {
+		return extractSymbol(currentChar);
 	} else {
-		while (
-			currentPosition < contents.length &&
-			contents[currentPosition] !== " " &&
-			!isSymbol(contents[currentPosition])
-		) {
-			token += contents[currentPosition];
-			currentPosition++;
-		}
+		return extractIdentifierOrKeywordOrInt(contents, pos);
+	}
+}
+
+function extractStringConstant(contents, pos) {
+	const startPosition = pos;
+	let token = "";
+	pos += 1; // Skip past the opening quote
+
+	while (pos < contents.length && contents[pos] !== '"') {
+		token += contents[pos];
+		pos++;
 	}
 
-	const charsConsumed = currentPosition - startPosition;
+	pos += 1; // Skip past the closing quote
 	return {
 		value: token,
-		length: charsConsumed,
+		length: pos - startPosition,
 	};
+}
+
+function extractSymbol(symbol) {
+	return {
+		value: symbol,
+		length: 1,
+		tokenType: "SYMBOL",
+	};
+}
+
+// hate this function name gotta fix
+function extractIdentifierOrKeywordOrInt(contents, pos) {
+	const startPosition = pos;
+	let token = "";
+
+	while (pos < contents.length && contents[pos] !== " " && !isSymbol(contents[pos])) {
+		token += contents[pos];
+		pos++;
+	}
+
+	return {
+		value: token,
+		length: pos - startPosition,
+	};
+}
+
+/**
+ * Gets the type of the current token
+ * @returns {string} Token type
+ */
+function getTokenType(token) {
+	if (isSymbol(token)) {
+		return "SYMBOL";
+	} else if (isNumber(token)) {
+		return "INT_CONST";
+	} else if (keywords.includes(token)) {
+		return "KEYWORD";
+	} else {
+		return "IDENTIFIER";
+	}
 }
 
 /**
@@ -97,52 +139,20 @@ function isSymbol(char) {
 }
 
 /**
- * Checks if character is a digit
+ * Checks if character is a number
  * @param {string} char - Character to check
- * @returns {boolean} True if the character is a digit
+ * @returns {boolean} True if the character is a number
  */
-function isDigit(char) {
-	return /^\d$/.test(char);
-}
-
-/**
- * Gets the type of the current token
- * @returns {string} Token type
- */
-function getTokenType() {
-	// Implementation needed
+function isNumber(char) {
+	return /\d+/.test(char);
 }
 
 /**
  * Gets the keyword value of the current token
  * @returns {string} Keyword value
  */
-function getKeywordValue() {
-	// Implementation needed
-}
-
-/**
- * Gets the symbol value of the current token
- * @returns {string} Symbol value
- */
-function getSymbolValue() {
-	// Implementation needed
-}
-
-/**
- * Gets the integer value of the current token
- * @returns {number} Integer value
- */
-function getIntValue() {
-	// Implementation needed
-}
-
-/**
- * Gets the string value of the current token
- * @returns {string} String value
- */
-function getStringValue() {
-	// Implementation needed
+function getKeywordValue(token) {
+	return keywords.find(k => k === token);
 }
 
 module.exports = { tokenize };
