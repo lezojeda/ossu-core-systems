@@ -1,4 +1,5 @@
 const { tokenize } = require("./JackTokenizer");
+const { parseToXML } = require("./CompilationEngine");
 const path = require("path");
 const fs = require("fs");
 
@@ -23,13 +24,12 @@ if (fs.lstatSync(source).isDirectory()) {
 		files.forEach(file => {
 			if (path.extname(file) !== ".jack") return;
 
-			finalFile += tokenize(file);
+			finalFile += parseToXML(tokenize(file));
 		});
 
 		fs.writeFileSync(path.join(source, "final.vm"), finalFile);
 	});
 } else {
-	const fileTokenized = tokenize(source);
+	const fileTokenized = parseToXML(tokenize(source));
 	fs.writeFileSync(source.replace(".jack", ".vm"), fileTokenized);
 }
-d

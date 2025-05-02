@@ -102,7 +102,7 @@ function extractIdentifierOrKeywordOrInt(contents, pos) {
 	const startPosition = pos;
 	let token = "";
 
-	while (pos < contents.length && contents[pos] !== " " && !isSymbol(contents[pos])) {
+	while (pos < contents.length && contents[pos] !== " " && !isSymbol (contents[pos])) {
 		token += contents[pos];
 		pos++;
 	}

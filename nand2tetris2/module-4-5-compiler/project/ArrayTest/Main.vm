@@ -1,1 +1,28 @@
-class Main {, function void main() {, var Array a;, var int length;, var int i, sum;, let length = Keyboard.readInt("HOW MANY NUMBERS? ");, let a = Array.new(length);, let i = 0;, while (i < length) {, let a[i] = Keyboard.readInt("ENTER THE NEXT NUMBER: ");, let i = i + 1;, }, let i = 0;, let sum = 0;, while (i < length) {, let sum = sum + a[i];, let i = i + 1;, }, do Output.printString("THE AVERAGE IS: ");, do Output.printInt(sum / length);, do Output.println();, return;, }, }
+<class>
+	<keyword>class</keyword>
+	<identifier>Main</identifier>
+	<symbol>{</symbol>
+	<subroutineDec>
+		<keyword>function</keyword>
+		<keyword>void</keyword>
+		<identifier>func</identifier>
+		<symbol>(</symbol>
+		<parameterList>
+			<keyword>int</keyword>
+			<identifier>a</identifier>
+			<symbol>,</symbol>
+			<keyword>int</keyword>
+			<identifier>b</identifier>
+			<symbol>,</symbol>
+			<keyword>int</keyword>
+			<identifier>c</identifier>
+			<symbol>,</symbol>
+			<keyword>boolean</keyword>
+			<identifier>d</identifier>
+		</parameterList>
+		<symbol>)</symbol>
+	<subroutineBody>
+	</subroutineBody>
+	</subroutineDec>
+	<symbol>{</symbol>
+</class>
