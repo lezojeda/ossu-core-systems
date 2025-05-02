@@ -65,8 +65,16 @@ function compileTerminalToken(token, tab) {
 			? "stringConstant"
 			: tokenType.toLowerCase();
 
+	// Escape special characters for symbols
+	let escapedValue = value;
+	if (tag === "symbol") {
+		if (value === "<") escapedValue = "&lt;";
+		else if (value === ">") escapedValue = "&gt;";
+		else if (value === "&") escapedValue = "&amp;";
+	}
+
 	const tabs = "\t".repeat(tab);
-	return `${tabs}<${tag}>${value}</${tag}>\n`;
+	return `${tabs}<${tag}> ${escapedValue} </${tag}>\n`;
 }
 
 function compileParameterList(tokens, tab, pointer) {
@@ -103,7 +111,9 @@ function compileSubroutineBody(tokens, tab, pointer) {
 	xml += statementsResult.xml;
 	pointer = statementsResult.pointer;
 
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // }
 	xml += `${tabs}</subroutineBody>\n`;
+
 	return { xml, pointer };
 }
 
@@ -146,7 +156,6 @@ function compileStatements(tokens, tab, pointer) {
 	let xml = `${tabs}<statements>\n`;
 
 	while (tokens[pointer].value !== "}") {
-		// check if current token is do, let, while, return or if and pass control to its compile function
 		switch (tokens[pointer].value) {
 			case "do":
 				const doResult = compileDo(tokens, tab + 1, pointer);
@@ -194,6 +203,7 @@ function compileDo(tokens, tab, pointer) {
           <symbol> ; </symbol>
         </doStatement>
 	 */
+
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<doStatement>\n`;
 
@@ -219,7 +229,35 @@ function compileDo(tokens, tab, pointer) {
 	return { xml, pointer };
 }
 
-function compileLet(tokens, tab, pointer) {}
+function compileLet(tokens, tab, pointer) {
+	// 'let' varName ('[' expression ']')? '=' expression ';'
+	const tabs = "\t".repeat(tab);
+	let xml = `${tabs}<letStatement>\n`;
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'let'
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // varName
+
+	if (tokens[pointer].value === "[") {
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // '['
+
+		const expressionResult = compileExpression(tokens, tab + 1, pointer);
+		xml += expressionResult.xml;
+		pointer = expressionResult.pointer;
+
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // ']'
+	}
+
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '='
+
+	// Expression
+	const expressionResult = compileExpression(tokens, tab + 1, pointer);
+	xml += expressionResult.xml;
+	pointer = expressionResult.pointer;
+
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ';'
+	xml += `${tabs}</letStatement>\n`;
+
+	return { xml, pointer };
+}
 
 function compileWhile(tokens, tab, pointer) {
 	// 'while' '(' expression ')' '{' statements '}'
@@ -257,6 +295,7 @@ function compileReturn(tokens, tab, pointer) {
           <symbol> ; </symbol>
         </returnStatement>
 	 */
+
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<returnStatement>\n`;
 
@@ -266,7 +305,7 @@ function compileReturn(tokens, tab, pointer) {
 	if (tokens[pointer].value !== ";") {
 		const expressionResult = compileExpression(tokens, tab + 1, pointer);
 		xml += expressionResult.xml;
-		pointer += expressionResult.pointer;
+		pointer = expressionResult.pointer;
 	}
 
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ;
@@ -275,36 +314,41 @@ function compileReturn(tokens, tab, pointer) {
 }
 
 function compileIf(tokens, tab, pointer) {
-	// 'if' '(' expression ')' '{' statements '}'
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<ifStatement>\n`;
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'if'
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '('
-
 	// Expression
 	const expressionResult = compileExpression(tokens, tab + 1, pointer);
 	xml += expressionResult.xml;
 	pointer = expressionResult.pointer;
-
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ')'
-
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '{'
-
 	// Statements
 	const statementsResult = compileStatements(tokens, tab + 1, pointer); // statements
 	xml += statementsResult.xml;
 	pointer = statementsResult.pointer;
-
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '}'
-	xml += `${tabs}</ifStatement>\n`;
 
+	// Handle optional else clause
+	if (tokens[pointer]?.value === "else") {
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'else'
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // '{'
+		// Statements
+		const elseStatementsResult = compileStatements(tokens, tab + 1, pointer);
+		xml += elseStatementsResult.xml;
+		pointer = elseStatementsResult.pointer;
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // '}'
+	}
+
+	xml += `${tabs}</ifStatement>\n`;
 	return { xml, pointer };
 }
 
 function compileExpression(tokens, tab, pointer) {
 	// term (op term)*
 	/**
-	 * <expression>
+	 *  <expression>
             <term>
               <identifier> Array </identifier>
               <symbol> . </symbol>
@@ -319,38 +363,114 @@ function compileExpression(tokens, tab, pointer) {
               </expressionList>
               <symbol> ) </symbol>
             </term>
-          </expression>
+        </expression>
 	 */
+
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<expression>\n`;
 
-	// IMPLEMENT
+	const term = compileTerm(tokens, tab + 1, pointer);
+	xml += term.xml;
+	pointer = term.pointer;
+
+	const jackOperators = ["+", "-", "*", "/", "&", "|", "<", ">", "="];
+	while (jackOperators.includes(tokens[pointer].value)) {
+		xml += compileTerminalToken(tokens[pointer++], tab + 1);
+
+		// Compile next term
+		const term = compileTerm(tokens, tab + 1, pointer);
+		xml += term.xml;
+		pointer = term.pointer;
+	}
 
 	xml += `${tabs}</expression>\n`;
-
 	return { xml, pointer };
 }
 
-function compileTerm(tokens, tab) {}
+function compileTerm(tokens, tab, pointer) {
+	const tabs = "\t".repeat(tab);
+	let xml = `${tabs}<term>\n`;
+
+	const nextToken = tokens[pointer + 1] || {};
+
+	// Integer constant, string constant, keyword constant, or simple identifier
+	if (
+		tokens[pointer].tokenType === "INT_CONST" ||
+		tokens[pointer].tokenType === "STRING_CONST" ||
+		["true", "false", "null", "this"].includes(tokens[pointer].value)
+	) {
+		xml += compileTerminalToken(tokens[pointer++], tab + 1);
+	}
+	// Unary operator term
+	else if (["-", "~"].includes(tokens[pointer].value)) {
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // unary op
+		const termResult = compileTerm(tokens, tab + 1, pointer);
+		xml += termResult.xml;
+		pointer = termResult.pointer;
+	}
+	// Grouped expression: (expression)
+	else if (tokens[pointer].value === "(") {
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // '('
+		const expressionResult = compileExpression(tokens, tab + 1, pointer);
+		xml += expressionResult.xml;
+		pointer = expressionResult.pointer;
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // ')'
+	}
+	// Array access: varName[expression]
+	else if (nextToken.value === "[") {
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // identifier
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // '['
+		const expressionResult = compileExpression(tokens, tab + 1, pointer);
+		xml += expressionResult.xml;
+		pointer = expressionResult.pointer;
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // ']'
+	}
+	// Subroutine call: ClassName.subroutine() or subroutine()
+	else if (nextToken.value === "." || nextToken.value === "(") {
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // identifier
+		if (nextToken.value === ".") {
+			xml += compileTerminalToken(tokens[pointer++], tab + 1); // '.'
+			xml += compileTerminalToken(tokens[pointer++], tab + 1); // subroutine name
+		}
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // '('
+		// Compile expression list (arguments)
+		const expListResult = compileExpressionList(tokens, tab + 1, pointer);
+		xml += expListResult.xml;
+		pointer = expListResult.pointer;
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // ')'
+	}
+	// Simple variable name
+	else {
+		xml += compileTerminalToken(tokens[pointer++], tab + 1);
+	}
+
+	xml += `${tabs}</term>\n`;
+	return { xml, pointer };
+}
 
 function compileExpressionList(tokens, tab, pointer) {
-	// (expression (',' expression)* )?
-	/**
-	 * <expressionList>
-            <expression>
-                <term>
-                    <identifier> x </identifier>
-                </term>
-            </expression>
-        </expressionList>
-	 *  */
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<expressionList>\n`;
 
-	// IMPLEMENT
+	// Handle empty expression list (e.g., f())
+	if (tokens[pointer].value === ")") {
+		xml += `${tabs}</expressionList>\n`;
+		return { xml, pointer };
+	}
+
+	while (true) {
+		const expResult = compileExpression(tokens, tab + 1, pointer);
+		xml += expResult.xml;
+		pointer = expResult.pointer;
+
+		if (tokens[pointer].value === ",") {
+			xml += compileTerminalToken(tokens[pointer++], tab + 1);
+		} else {
+			break; // no more expressions
+		}
+	}
 
 	xml += `${tabs}</expressionList>\n`;
-
 	return { xml, pointer };
 }
 

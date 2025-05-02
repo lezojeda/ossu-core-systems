@@ -1,7 +1,0 @@
-class Main {
-    static int x,y;
-    function void func(int a, int b, int c, boolean d) {
-        var int a,b;
-        return;
-    }
-}

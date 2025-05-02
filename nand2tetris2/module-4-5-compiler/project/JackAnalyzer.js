@@ -19,15 +19,15 @@ if (fs.lstatSync(source).isDirectory()) {
 			process.exit(1);
 		}
 
-		let finalFile = "";
-
-		files.forEach(file => {
+		
+		files.forEach(file => {			
 			if (path.extname(file) !== ".jack") return;
 
-			finalFile += parseToXML(tokenize(file));
+			const finalFile = parseToXML(tokenize(path.join(source, file)));
+
+			fs.writeFileSync(path.join(source, `${file}.vm`), finalFile);
 		});
 
-		fs.writeFileSync(path.join(source, "final.vm"), finalFile);
 	});
 } else {
 	const fileTokenized = parseToXML(tokenize(source));

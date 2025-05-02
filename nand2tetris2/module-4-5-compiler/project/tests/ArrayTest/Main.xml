@@ -22,7 +22,7 @@
         <keyword> var </keyword>
         <keyword> int </keyword>
         <identifier> length </identifier>
-        <symbol> ; </symbol>Statement
+        <symbol> ; </symbol>
       </varDec>
       <varDec>
         <keyword> var </keyword>
