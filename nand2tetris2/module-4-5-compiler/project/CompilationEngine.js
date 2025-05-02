@@ -179,11 +179,49 @@ function compileStatements(tokens, tab, pointer) {
 	return { xml, pointer };
 }
 
-function compileDo(tokens, tab) {}
+function compileDo(tokens, tab, pointer) {
+	// 'do' subroutineCall ';'
+	/**
+	 * <doStatement>
+          <keyword> do </keyword>
+          <identifier> game </identifier>
+          <symbol> . </symbol>
+          <identifier> run </identifier>
+          <symbol> ( </symbol>
+          <expressionList>
+          </expressionList>
+          <symbol> ) </symbol>
+          <symbol> ; </symbol>
+        </doStatement>
+	 */
+	const tabs = "\t".repeat(tab);
+	let xml = `${tabs}<doStatement>\n`;
 
-function compileLet(tokens, tab) {}
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'do'
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'identifier'
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '.'
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'subroutine'
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '('
 
-function compileWhile(tokens, tab) {}
+	// compile expressionlist
+	const { xml: expressionListXML, pointer: expressionListPointer } = compileExpressionList(
+		tokens,
+		tab + 1,
+		pointer
+	);
+	xml += expressionListXML;
+	pointer = expressionListPointer;
+
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ')'
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ';'
+	xml += `${tabs}</doStatement>\n`;
+
+	return { xml, pointer };
+}
+
+function compileLet(tokens, tab, pointer) {}
+
+function compileWhile(tokens, tab, pointer) {}
 
 function compileReturn(tokens, tab, pointer) {
 	// 'return' expression? ';'
@@ -210,9 +248,9 @@ function compileReturn(tokens, tab, pointer) {
 	return { xml, pointer };
 }
 
-function compileIf(tokens, tab) {}
+function compileIf(tokens, tab, pointer) {}
 
-function compileExpression(tokens, pointer, tab) {
+function compileExpression(tokens, tab, pointer) {
 	// term (op term)*
 	/**
 	 * <expression>
@@ -235,6 +273,8 @@ function compileExpression(tokens, pointer, tab) {
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<expression>\n`;
 
+	// IMPLEMENT
+
 	xml += `${tabs}</expression>\n`;
 
 	return { xml, pointer };
@@ -242,6 +282,25 @@ function compileExpression(tokens, pointer, tab) {
 
 function compileTerm(tokens, tab) {}
 
-function compileExpressionList(tokens, tab) {}
+function compileExpressionList(tokens, tab, pointer) {
+	// (expression (',' expression)* )?
+	/**
+	 * <expressionList>
+            <expression>
+                <term>
+                    <identifier> x </identifier>
+                </term>
+            </expression>
+        </expressionList>
+	 *  */
+	const tabs = "\t".repeat(tab);
+	let xml = `${tabs}<expressionList>\n`;
+
+	// IMPLEMENT
+
+	xml += `${tabs}</expressionList>\n`;
+
+	return { xml, pointer };
+}
 
 module.exports = { parseToXML };
