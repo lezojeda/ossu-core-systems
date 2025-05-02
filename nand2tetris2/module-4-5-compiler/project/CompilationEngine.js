@@ -12,9 +12,9 @@ function compileClass(tokens, tab, pointer) {
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '{'
 
 	while (["static", "field"].includes(tokens[pointer]?.value)) {
-		const result = compileVarDec(tokens, tab + 1, pointer);
+		const result = compileClassVarDec(tokens, tab + 1, pointer);
 		xml += result.xml;
-		pointer = result.i;
+		pointer = result.pointer;
 	}
 
 	while (["constructor", "function", "method"].includes(tokens[pointer]?.value)) {
@@ -76,8 +76,9 @@ function compileParameterList(tokens, tab, pointer) {
 	while (tokens[pointer].value !== ")") {
 		xml += compileTerminalToken(tokens[pointer++], tab + 1); // parameter type
 		xml += compileTerminalToken(tokens[pointer++], tab + 1); // parameter name
+
 		if (tokens[pointer].value === ",") {
-			xml += compileTerminalToken(tokens[pointer++], tab + 1); // parameter name
+			xml += compileTerminalToken(tokens[pointer++], tab + 1); // comma separator
 		}
 	}
 
@@ -89,11 +90,51 @@ function compileSubroutineBody(tokens, tab, pointer) {
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<subroutineBody>\n`;
 
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // {
+
+	if (tokens[pointer]?.value === "var") {
+		const result = compileVarDec(tokens, tab + 1, pointer);
+		xml += result.xml;
+		pointer = result.pointer;
+	}
+
 	xml += `${tabs}</subroutineBody>\n`;
 	return { xml, pointer };
 }
 
-function compileVarDec(tokens, tab) {}
+function compileClassVarDec(tokens, tab, pointer) {
+	const tabs = "\t".repeat(tab);
+	let xml = `${tabs}<classVarDec>\n`;
+
+	while (tokens[pointer].value !== ";") {
+		xml += compileTerminalToken(tokens[pointer++], tab + 1);
+
+		if (tokens[pointer].value === ",") {
+			xml += compileTerminalToken(tokens[pointer++], tab + 1); // comma separator
+		}
+	}
+
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ;
+	xml += `${tabs}</classVarDec>\n`;
+	return { xml, pointer };
+}
+
+function compileVarDec(tokens, tab, pointer) {
+	const tabs = "\t".repeat(tab);
+	let xml = `${tabs}<varDec>\n`;
+
+	while (tokens[pointer].value !== ";") {
+		xml += compileTerminalToken(tokens[pointer++], tab + 1);
+
+		if (tokens[pointer].value === ",") {
+			xml += compileTerminalToken(tokens[pointer++], tab + 1); // comma separator
+		}
+	}
+
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ;
+	xml += `${tabs}</varDec>\n`;
+	return { xml, pointer };
+}
 
 function compileStatements(tokens, tab) {}
 
