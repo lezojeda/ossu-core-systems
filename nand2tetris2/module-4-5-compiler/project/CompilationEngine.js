@@ -92,7 +92,7 @@ function compileSubroutineBody(tokens, tab, pointer) {
 
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // {
 
-	if (tokens[pointer]?.value === "var") {
+	while (tokens[pointer]?.value === "var") {
 		const result = compileVarDec(tokens, tab + 1, pointer);
 		xml += result.xml;
 		pointer = result.pointer;
