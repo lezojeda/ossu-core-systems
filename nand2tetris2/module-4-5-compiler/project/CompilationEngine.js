@@ -12,15 +12,15 @@ function compileClass(tokens, tab, pointer) {
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '{'
 
 	while (["static", "field"].includes(tokens[pointer]?.value)) {
-		const result = compileClassVarDec(tokens, tab + 1, pointer);
-		xml += result.xml;
-		pointer = result.pointer;
+		const classVarDecResult = compileClassVarDec(tokens, tab + 1, pointer);
+		xml += classVarDecResult.xml;
+		pointer = classVarDecResult.pointer;
 	}
 
 	while (["constructor", "function", "method"].includes(tokens[pointer]?.value)) {
-		const result = compileSubroutine(tokens, tab + 1, pointer);
-		xml += result.xml;
-		pointer = result.pointer;
+		const subroutineResult = compileSubroutine(tokens, tab + 1, pointer);
+		xml += subroutineResult.xml;
+		pointer = subroutineResult.pointer;
 	}
 
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '}'
@@ -190,30 +190,21 @@ function compileStatements(tokens, tab, pointer) {
 
 function compileDo(tokens, tab, pointer) {
 	// 'do' subroutineCall ';'
-	/**
-	 * <doStatement>
-          <keyword> do </keyword>
-          <identifier> game </identifier>
-          <symbol> . </symbol>
-          <identifier> run </identifier>
-          <symbol> ( </symbol>
-          <expressionList>
-          </expressionList>
-          <symbol> ) </symbol>
-          <symbol> ; </symbol>
-        </doStatement>
-	 */
-
+	
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<doStatement>\n`;
 
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'do'
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'identifier'
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '.'
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'subroutine'
+	xml += compileTerminalToken(tokens[pointer++], tab + 1); // identifier (varName or subroutineName)
+
+	if (tokens[pointer].value === ".") {
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // '.'
+		xml += compileTerminalToken(tokens[pointer++], tab + 1); // subroutine name
+	}
+
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '('
 
-	// compile expressionlist
+	// Expression list
 	const { xml: expressionListXML, pointer: expressionListPointer } = compileExpressionList(
 		tokens,
 		tab + 1,
@@ -231,6 +222,7 @@ function compileDo(tokens, tab, pointer) {
 
 function compileLet(tokens, tab, pointer) {
 	// 'let' varName ('[' expression ']')? '=' expression ';'
+
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<letStatement>\n`;
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'let'
@@ -261,6 +253,7 @@ function compileLet(tokens, tab, pointer) {
 
 function compileWhile(tokens, tab, pointer) {
 	// 'while' '(' expression ')' '{' statements '}'
+
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<whileStatement>\n`;
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'while'
@@ -288,13 +281,6 @@ function compileWhile(tokens, tab, pointer) {
 
 function compileReturn(tokens, tab, pointer) {
 	// 'return' expression? ';'
-	/**
-	 * Example: 
-	 * <returnStatement>
-          <keyword> return </keyword>
-          <symbol> ; </symbol>
-        </returnStatement>
-	 */
 
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<returnStatement>\n`;
@@ -316,14 +302,17 @@ function compileReturn(tokens, tab, pointer) {
 function compileIf(tokens, tab, pointer) {
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<ifStatement>\n`;
+
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'if'
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '('
+
 	// Expression
 	const expressionResult = compileExpression(tokens, tab + 1, pointer);
 	xml += expressionResult.xml;
 	pointer = expressionResult.pointer;
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ')'
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '{'
+
 	// Statements
 	const statementsResult = compileStatements(tokens, tab + 1, pointer); // statements
 	xml += statementsResult.xml;
@@ -347,24 +336,6 @@ function compileIf(tokens, tab, pointer) {
 
 function compileExpression(tokens, tab, pointer) {
 	// term (op term)*
-	/**
-	 *  <expression>
-            <term>
-              <identifier> Array </identifier>
-              <symbol> . </symbol>
-              <identifier> new </identifier>
-              <symbol> ( </symbol>
-              <expressionList>
-                <expression>
-                  <term>
-                    <identifier> length </identifier>
-                  </term>
-                </expression>
-              </expressionList>
-              <symbol> ) </symbol>
-            </term>
-        </expression>
-	 */
 
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<expression>\n`;
@@ -373,8 +344,8 @@ function compileExpression(tokens, tab, pointer) {
 	xml += term.xml;
 	pointer = term.pointer;
 
-	const jackOperators = ["+", "-", "*", "/", "&", "|", "<", ">", "="];
-	while (jackOperators.includes(tokens[pointer].value)) {
+	const operators = ["+", "-", "*", "/", "&", "|", "<", ">", "="];
+	while (operators.includes(tokens[pointer].value)) {
 		xml += compileTerminalToken(tokens[pointer++], tab + 1);
 
 		// Compile next term
