@@ -6,8 +6,8 @@
             "request": "launch",
             "name": "VM Translator Debug",
             "runtimeExecutable": "${env:HOME}/.nvm/versions/node/v20.15.1/bin/node",
-            "program": "${workspaceFolder}/JackAnalyzer.js",
-            "args": ["./tests/Square/Main.jack"],
+            "program": "${workspaceFolder}/JackCompiler.js",
+            "args": ["./tests/Square/Square.jack"],
             "cwd": "${workspaceFolder}"
         }
     ]

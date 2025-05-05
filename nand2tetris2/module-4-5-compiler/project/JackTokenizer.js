@@ -21,10 +21,13 @@ function tokenize(source) {
 			pointer += 1;
 		} else {
 			const { value, length } = extractToken(cleanContents, pointer);
+			const tokenType = getTokenType(value);
+			const keyword = tokenType === "KEYWORD" ? getKeyword(value) : undefined;
 
 			currentToken = {
-				tokenType: cleanContents[pointer] === '"' ? "STRING_CONST" : getTokenType(value),
+				tokenType: cleanContents[pointer] === '"' ? "STRING_CONST" : tokenType,
 				value,
+				...(keyword && { keyword }), 
 			};
 
 			tokens.push(currentToken);
@@ -40,7 +43,7 @@ function tokenize(source) {
 /**
  * Removes newlines and comments from the source content
  * @param {string} content - Raw file content
- * @returns {string} Cleaned content with comments and newlines removed
+ * @returns {string} Cleantokens[pointer].valueed content with comments and newlines removed
  */
 function removeComments(content) {
 	return content
@@ -151,7 +154,7 @@ function isNumber(char) {
  * Gets the keyword value of the current token
  * @returns {string} Keyword value
  */
-function getKeywordValue(token) {
+function getKeyword(token) {
 	return keywords.find(k => k === token);
 }
 

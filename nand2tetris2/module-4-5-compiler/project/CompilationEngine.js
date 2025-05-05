@@ -1,3 +1,5 @@
+const symbolTable = require("./SymbolTable");
+
 function parseToXML(tokens, tab = 0, pointer = 0) {
 	const { xml } = compileClass(tokens, tab, pointer);
 	return xml;
@@ -121,8 +123,23 @@ function compileClassVarDec(tokens, tab, pointer) {
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<classVarDec>\n`;
 
+	// Parse kind and type
+	const kind = tokens[pointer].value; // 'static' or 'field'
+	xml += compileTerminalToken(tokens[pointer++], tab + 1);
+
+	const type = tokens[pointer].value; // e.g., 'int', 'boolean', or className
+	xml += compileTerminalToken(tokens[pointer++], tab + 1);
+
+	// First varName
 	while (tokens[pointer].value !== ";") {
+		const name = tokens[pointer].value;
+
 		xml += compileTerminalToken(tokens[pointer++], tab + 1);
+		symbolTable.defineClassSymbol(
+			name,
+			type,
+			kind
+		);
 
 		if (tokens[pointer].value === ",") {
 			xml += compileTerminalToken(tokens[pointer++], tab + 1); // comma separator
@@ -190,7 +207,7 @@ function compileStatements(tokens, tab, pointer) {
 
 function compileDo(tokens, tab, pointer) {
 	// 'do' subroutineCall ';'
-	
+
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<doStatement>\n`;
 

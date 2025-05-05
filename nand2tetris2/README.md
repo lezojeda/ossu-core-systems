@@ -37,4 +37,13 @@ language
 - parse trees
 - XML/mark-up
 - compilation
-- 
+### Project
+Build the first part of the Jack compiler, the syntax analyzer.
+## Module 5: Compiler
+- compiling procedural code
+- code generation techniques
+- recursive compilation engine
+- symbol tables
+- memory management
+### Project
+Finish the Jack compiler into a full-scale compiler.
