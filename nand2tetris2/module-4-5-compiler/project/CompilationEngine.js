@@ -10,6 +10,8 @@ function compileClass(tokens, tab, pointer) {
 	let xml = `${tabs}<class>\n`;
 
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'class'
+
+	const className = tokens[pointer].value;
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // class name
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '{'
 
@@ -20,7 +22,7 @@ function compileClass(tokens, tab, pointer) {
 	}
 
 	while (["constructor", "function", "method"].includes(tokens[pointer]?.value)) {
-		const subroutineResult = compileSubroutine(tokens, tab + 1, pointer);
+		const subroutineResult = compileSubroutine(tokens, tab + 1, pointer, className);
 		xml += subroutineResult.xml;
 		pointer = subroutineResult.pointer;
 	}
@@ -31,9 +33,12 @@ function compileClass(tokens, tab, pointer) {
 	return { xml, pointer };
 }
 
-function compileSubroutine(tokens, tab, pointer) {
+function compileSubroutine(tokens, tab, pointer, className) {
+	symbolTable.startSubroutine();
+
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<subroutineDec>\n`;
+	symbolTable.defineSubroutineSymbol("this", className, "argument");
 
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'function'
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // function return type
@@ -41,7 +46,7 @@ function compileSubroutine(tokens, tab, pointer) {
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '('
 
 	// Parameter list
-	const parameterList = compileParameterList(tokens, tab + 1, pointer);
+	const parameterList = compileParameterList(tokens, tab + 1, pointer, className);
 	xml += parameterList.xml;
 	pointer = parameterList.pointer;
 
@@ -79,12 +84,15 @@ function compileTerminalToken(token, tab) {
 	return `${tabs}<${tag}> ${escapedValue} </${tag}>\n`;
 }
 
-function compileParameterList(tokens, tab, pointer) {
+function compileParameterList(tokens, tab, pointer, className) {
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<parameterList>\n`;
 
 	while (tokens[pointer].value !== ")") {
 		xml += compileTerminalToken(tokens[pointer++], tab + 1); // parameter type
+
+		const parameterName = tokens[pointer].value;
+		symbolTable.defineSubroutineSymbol(parameterName, className, "argument");
 		xml += compileTerminalToken(tokens[pointer++], tab + 1); // parameter name
 
 		if (tokens[pointer].value === ",") {
@@ -127,7 +135,7 @@ function compileClassVarDec(tokens, tab, pointer) {
 	const kind = tokens[pointer].value; // 'static' or 'field'
 	xml += compileTerminalToken(tokens[pointer++], tab + 1);
 
-	const type = tokens[pointer].value; // e.g., 'int', 'boolean', or className
+	const type = tokens[pointer].value; // e.g., 'int' or 'boolean'
 	xml += compileTerminalToken(tokens[pointer++], tab + 1);
 
 	// First varName
@@ -135,11 +143,7 @@ function compileClassVarDec(tokens, tab, pointer) {
 		const name = tokens[pointer].value;
 
 		xml += compileTerminalToken(tokens[pointer++], tab + 1);
-		symbolTable.defineClassSymbol(
-			name,
-			type,
-			kind
-		);
+		symbolTable.defineClassSymbol(name, type, kind);
 
 		if (tokens[pointer].value === ",") {
 			xml += compileTerminalToken(tokens[pointer++], tab + 1); // comma separator
@@ -155,8 +159,17 @@ function compileVarDec(tokens, tab, pointer) {
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<varDec>\n`;
 
+	// Parse kind and type
+	xml += compileTerminalToken(tokens[pointer++], tab + 1);
+
+	const type = tokens[pointer].value;
+	xml += compileTerminalToken(tokens[pointer++], tab + 1);
+
 	while (tokens[pointer].value !== ";") {
+		const name = tokens[pointer].value;
+
 		xml += compileTerminalToken(tokens[pointer++], tab + 1);
+		symbolTable.defineSubroutineSymbol(name, type, "local");
 
 		if (tokens[pointer].value === ",") {
 			xml += compileTerminalToken(tokens[pointer++], tab + 1); // comma separator
