@@ -14,18 +14,18 @@ const symbolTable = {
 		counters: { argument: 0, local: 0 },
 	},
 	defineClassSymbol(name, type, kind) {
-		const table = symbolTable["class"];
-		const index = table.counters[kind];
+		const context = symbolTable["class"];
+		const index = context.counters[kind];
 
-		table[name] = { type, kind, index };
-		table.counters[kind]++;
+		context.table[name] = { type, kind, index };
+		context.counters[kind]++;
 	},
 	defineSubroutineSymbol(name, type, kind) {
-		const table = symbolTable["subroutine"];
-		const index = table.counters[kind];
+		const context = symbolTable["subroutine"];
+		const index = context.counters[kind];
 
-		table[name] = { type, kind, index };
-		table.counters[kind]++;
+		context.table[name] = { type, kind, index };
+		context.counters[kind]++;
 	},
 	startSubroutine() {
 		const table = symbolTable["subroutine"];
