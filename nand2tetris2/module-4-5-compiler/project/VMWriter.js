@@ -1,35 +1,52 @@
 function writePush(segment, index) {
-	return `push ${segment} ${index}`;
+	return `push ${segment} ${index}\n`;
 }
 
 function writePop(segment, index) {
-	return `pop ${segment} ${index}`;
+	return `pop ${segment} ${index}\n`;
 }
 
 function writeArithmetic(command) {
-	const commands = ["add", "sub", "neg", "eq", "gt", "lt", "and", "or", "not"];
-
-	if (!commands.includes(command)) {
-		throw new Error(`Invalid command. Must be one of ${commands.join(", ")}`);
+	switch (command) {
+		case "+":
+			return "add\n";
+		case "-":
+			return "sub\n";
+		case "*":
+			return "call Math.multiply\n";
+		case "/":
+			return "call Math.divide\n";
+		case "&":
+			return "and\n";
+		case "|":
+			return "or\n";
+		case "<":
+			return "lt\n";
+		case ">":
+			return "gt\n";
+		case "=":
+			return "eq\n";
 	}
-
-	return command;
 }
 
 function writeLabel() {
-	return "label";
+	return "label\n";
 }
 
 function writeGoto() {
-	return "goto";
+	return "goto\n";
 }
 
 function writeIf() {
-	return "if";
+	return "if\n";
 }
 
 function writeReturn() {
-	return "return";
+	return "return\n";
+}
+
+function writeCall(f) {
+	return `call ${f}\n`;
 }
 
 module.exports = {
@@ -40,4 +57,5 @@ module.exports = {
 	writeGoto,
 	writeIf,
 	writeReturn,
+	writeCall,
 };

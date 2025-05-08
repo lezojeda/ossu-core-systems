@@ -1,3 +1,4 @@
+const operators = require("./operators");
 const symbolTable = require("./SymbolTable");
 const VMWriter = require("./VMWriter");
 
@@ -366,38 +367,36 @@ function compileIf(tokens, tab, pointer) {
 }
 
 function compileExpression(tokens, tab, pointer) {
-	// term (op term)*
+	let code = "";
 
-	const tabs = "\t".repeat(tab);
-	let xml = `${tabs}<expression>\n`;
+	// Compile first term
+	const termResult = compileTerm(tokens, tab + 1, pointer);
+	code += termResult.xml;
+	pointer = termResult.pointer;
 
-	const term = compileTerm(tokens, tab + 1, pointer);
-	xml += term.xml;
-	pointer = term.pointer;
+	// Compile (op term)* pattern
+	while (operators.includes(tokens[pointer]?.value)) {
+		const op = VMWriter.writeArithmetic(tokens[pointer]?.value);
+		pointer++;
 
-	const operators = ["+", "-", "*", "/", "&", "|", "<", ">", "="];
-	while (operators.includes(tokens[pointer].value)) {
-		xml += compileTerminalToken(tokens[pointer++], tab + 1);
+		const nextTermResult = compileTerm(tokens, tab + 1, pointer);
 
-		// Compile next term
-		const term = compileTerm(tokens, tab + 1, pointer);
-		xml += term.xml;
-		pointer = term.pointer;
+		code += nextTermResult.xml;
+		code += op;
+		pointer = nextTermResult.pointer;
 	}
 
-	xml += `${tabs}</expression>\n`;
-	return { xml, pointer };
+	return { xml: code, pointer };
 }
 
 function compileTerm(tokens, tab, pointer) {
-	const tabs = "\t".repeat(tab);
-	let code = `${tabs}<term>\n`;
+	let code = "";
 
 	const nextToken = tokens[pointer + 1] || {};
 
 	// Integer constant,
 	if (tokens[pointer].tokenType === "INT_CONST") {
-		code += VMWriter.writePush("constant", tokens[pointer++].value)
+		code += VMWriter.writePush("constant", tokens[pointer++].value);
 	}
 	// String constant, keyword constant, or simple identifier
 	else if (
@@ -406,20 +405,26 @@ function compileTerm(tokens, tab, pointer) {
 	) {
 		code += compileTerminalToken(tokens[pointer++], tab + 1);
 	}
-	// Unary operator term
+	// Unary operator term "op exp"
 	else if (["-", "~"].includes(tokens[pointer].value)) {
-		code += compileTerminalToken(tokens[pointer++], tab + 1); // unary op
-		const termResult = compileTerm(tokens, tab + 1, pointer);
+		const op = VMWriter.writeArithmetic(tokens[pointer]?.value); // unary op
+		pointer++;
+
+		const termResult = compileTerm(tokens, tab + 1, pointer); // term
 		code += termResult.xml;
+		code += op;
+
 		pointer = termResult.pointer;
 	}
 	// Grouped expression: (expression)
 	else if (tokens[pointer].value === "(") {
-		code += compileTerminalToken(tokens[pointer++], tab + 1); // '('
+		pointer++ // '('
+	
 		const expressionResult = compileExpression(tokens, tab + 1, pointer);
 		code += expressionResult.xml;
 		pointer = expressionResult.pointer;
-		code += compileTerminalToken(tokens[pointer++], tab + 1); // ')'
+	
+		pointer++ // ')'
 	}
 	// Array access: varName[expression]
 	else if (nextToken.value === "[") {
@@ -430,57 +435,75 @@ function compileTerm(tokens, tab, pointer) {
 		pointer = expressionResult.pointer;
 		code += compileTerminalToken(tokens[pointer++], tab + 1); // ']'
 	}
-	// Subroutine call: ClassName.subroutine() or subroutine()
-	else if (nextToken.value === "." || nextToken.value === "(") {
-		code += compileTerminalToken(tokens[pointer++], tab + 1); // identifier
-		if (nextToken.value === ".") {
-			code += compileTerminalToken(tokens[pointer++], tab + 1); // '.'
-			code += compileTerminalToken(tokens[pointer++], tab + 1); // subroutine name
-		}
-		code += compileTerminalToken(tokens[pointer++], tab + 1); // '('
+	// Class subroutine call: ClassName.subroutine()
+	else if (nextToken.value === ".") {
+		let identifier = tokens[pointer].value;
+		pointer++ // class identifier
+		
+		pointer++ // '.'
+		const subroutineName = tokens[pointer].value;
+		pointer++;
+
+		pointer++; // '('
+
 		// Compile expression list (arguments)
 		const expListResult = compileExpressionList(tokens, tab + 1, pointer);
 		code += expListResult.xml;
 		pointer = expListResult.pointer;
-		code += compileTerminalToken(tokens[pointer++], tab + 1); // ')'
+
+		pointer++; // ')
+		code += VMWriter.writeCall(subroutineName);
+	}
+	// Subroutine call: subroutine()
+	else if (nextToken.value === "(") {
+		const subroutineName = tokens[pointer].value;
+		pointer++;
+
+		pointer++ // '('
+
+		// Compile expression list (arguments)
+		const expListResult = compileExpressionList(tokens, tab + 1, pointer);
+		code += expListResult.xml;
+		pointer = expListResult.pointer;
+
+		pointer++ // ')'
+		code += VMWriter.writeCall(subroutineName);
 	}
 	// Simple variable name
 	else {
 		// Resolve varName to segment
 		const varName = tokens[pointer++].value;
-		const segment = symbolTable["subroutine"].table.hasOwnProperty(varName) ? symbolTable["subroutine"].table[varName].kind : symbolTable["class"].table[varName].kind;
+		const segment = symbolTable["subroutine"].table.hasOwnProperty(varName)
+			? symbolTable["subroutine"].table[varName].kind
+			: symbolTable["class"].table[varName].kind;
 
-		code += VMWriter.writePush(segment, varName)
+		code += VMWriter.writePush(segment === "field" ? "this" : segment, varName);
 	}
 
-	code += `${tabs}</term>\n`;
 	return { xml: code, pointer };
 }
 
 function compileExpressionList(tokens, tab, pointer) {
-	const tabs = "\t".repeat(tab);
-	let xml = `${tabs}<expressionList>\n`;
+	let code = "";
 
 	// Handle empty expression list (e.g., f())
 	if (tokens[pointer].value === ")") {
-		xml += `${tabs}</expressionList>\n`;
-		return { xml, pointer };
+		return { xml: code, pointer };
 	}
 
 	while (true) {
 		const expResult = compileExpression(tokens, tab + 1, pointer);
-		xml += expResult.xml;
+		code += expResult.xml;
 		pointer = expResult.pointer;
 
 		if (tokens[pointer].value === ",") {
-			xml += compileTerminalToken(tokens[pointer++], tab + 1);
+			pointer++; // ','
 		} else {
 			break; // no more expressions
 		}
 	}
 
-	xml += `${tabs}</expressionList>\n`;
-	return { xml, pointer };
+	return { xml: code, pointer };
 }
 
 module.exports = { parseToXML };
