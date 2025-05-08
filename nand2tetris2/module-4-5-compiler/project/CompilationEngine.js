@@ -418,13 +418,13 @@ function compileTerm(tokens, tab, pointer) {
 	}
 	// Grouped expression: (expression)
 	else if (tokens[pointer].value === "(") {
-		pointer++ // '('
-	
+		pointer++; // '('
+
 		const expressionResult = compileExpression(tokens, tab + 1, pointer);
 		code += expressionResult.xml;
 		pointer = expressionResult.pointer;
-	
-		pointer++ // ')'
+
+		pointer++; // ')'
 	}
 	// Array access: varName[expression]
 	else if (nextToken.value === "[") {
@@ -438,9 +438,9 @@ function compileTerm(tokens, tab, pointer) {
 	// Class subroutine call: ClassName.subroutine()
 	else if (nextToken.value === ".") {
 		let identifier = tokens[pointer].value;
-		pointer++ // class identifier
-		
-		pointer++ // '.'
+		pointer++; // class identifier
+
+		pointer++; // '.'
 		const subroutineName = tokens[pointer].value;
 		pointer++;
 
@@ -459,29 +459,29 @@ function compileTerm(tokens, tab, pointer) {
 		const subroutineName = tokens[pointer].value;
 		pointer++;
 
-		pointer++ // '('
+		pointer++; // '('
 
 		// Compile expression list (arguments)
 		const expListResult = compileExpressionList(tokens, tab + 1, pointer);
 		code += expListResult.xml;
 		pointer = expListResult.pointer;
 
-		pointer++ // ')'
+		pointer++; // ')'
 		code += VMWriter.writeCall(subroutineName);
 	}
 	// Simple variable name
 	else {
 		// Resolve varName to segment
 		const varName = tokens[pointer++].value;
-		let segment = "";
 
-		if (symbolTable["subroutine"].table.hasOwnProperty(varName)) {
-			segment = symbolTable["subroutine"].table[varName].kind;
-		} else if (symbolTable["class"].table.hasOwnProperty(varName)) {
-			segment = symbolTable["class"].table[varName].kind;
-		} else {
-			throw `${varName} is not defined`
+		const entry =
+			symbolTable["subroutine"].table[varName] ?? symbolTable["class"].table[varName];
+
+		if (!entry) {
+			throw `${varName} is not defined`;
 		}
+
+		const segment = entry.kind;
 
 		code += VMWriter.writePush(segment === "field" ? "this" : segment, varName);
 	}

@@ -43,6 +43,7 @@ function processSource(sourcePath) {
         } else {
             processFile(sourcePath);
         }
+		console.log("Successfully compiled the source files.")
     } catch (err) {
         handleError("Unexpected error:", err);
     }
