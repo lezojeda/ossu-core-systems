@@ -332,38 +332,38 @@ function compileReturn(tokens, tab, pointer) {
 }
 
 function compileIf(tokens, tab, pointer) {
-	const tabs = "\t".repeat(tab);
-	let xml = `${tabs}<ifStatement>\n`;
+	let code = "";
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'if'
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '('
+	code += compileTerminalToken(tokens[pointer++], tab + 1); // 'if'
+	code += compileTerminalToken(tokens[pointer++], tab + 1); // '('
 
 	// Expression
 	const expressionResult = compileExpression(tokens, tab + 1, pointer);
-	xml += expressionResult.xml;
+	VMWriter.writeArithmetic("not");
+	VMWriter.writeIf()
+	code += expressionResult.xml;
 	pointer = expressionResult.pointer;
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ')'
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '{'
+	pointer++; // ')'
+	pointer++; // '{'
 
 	// Statements
 	const statementsResult = compileStatements(tokens, tab + 1, pointer); // statements
-	xml += statementsResult.xml;
+	code += statementsResult.xml;
 	pointer = statementsResult.pointer;
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '}'
+	code += compileTerminalToken(tokens[pointer++], tab + 1); // '}'
 
 	// Handle optional else clause
 	if (tokens[pointer]?.value === "else") {
-		xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'else'
-		xml += compileTerminalToken(tokens[pointer++], tab + 1); // '{'
+		code += compileTerminalToken(tokens[pointer++], tab + 1); // 'else'
+		code += compileTerminalToken(tokens[pointer++], tab + 1); // '{'
 		// Statements
 		const elseStatementsResult = compileStatements(tokens, tab + 1, pointer);
-		xml += elseStatementsResult.xml;
+		code += elseStatementsResult.xml;
 		pointer = elseStatementsResult.pointer;
-		xml += compileTerminalToken(tokens[pointer++], tab + 1); // '}'
+		code += compileTerminalToken(tokens[pointer++], tab + 1); // '}'
 	}
 
-	xml += `${tabs}</ifStatement>\n`;
-	return { xml, pointer };
+	return { xml: code, pointer };
 }
 
 function compileExpression(tokens, tab, pointer) {

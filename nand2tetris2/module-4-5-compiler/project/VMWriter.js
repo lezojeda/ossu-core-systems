@@ -26,19 +26,21 @@ function writeArithmetic(command) {
 			return "gt\n";
 		case "=":
 			return "eq\n";
+		case "not":
+			return "not;"
 	}
 }
 
-function writeLabel() {
-	return "label\n";
+function writeLabel(label) {
+	return `label ${label}\n`;
 }
 
-function writeGoto() {
-	return "goto\n";
+function writeGoto(label) {
+	return `goto ${label}\n`;
 }
 
-function writeIf() {
-	return "if\n";
+function writeIf(label) {
+	return `if-goto ${label}\n`;
 }
 
 function writeReturn() {
