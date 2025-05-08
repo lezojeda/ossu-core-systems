@@ -473,9 +473,15 @@ function compileTerm(tokens, tab, pointer) {
 	else {
 		// Resolve varName to segment
 		const varName = tokens[pointer++].value;
-		const segment = symbolTable["subroutine"].table.hasOwnProperty(varName)
-			? symbolTable["subroutine"].table[varName].kind
-			: symbolTable["class"].table[varName].kind;
+		let segment = "";
+
+		if (symbolTable["subroutine"].table.hasOwnProperty(varName)) {
+			segment = symbolTable["subroutine"].table[varName].kind;
+		} else if (symbolTable["class"].table.hasOwnProperty(varName)) {
+			segment = symbolTable["class"].table[varName].kind;
+		} else {
+			throw `${varName} is not defined`
+		}
 
 		code += VMWriter.writePush(segment === "field" ? "this" : segment, varName);
 	}

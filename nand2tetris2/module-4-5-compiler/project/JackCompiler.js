@@ -6,30 +6,46 @@ const fs = require("fs");
 const source = process.argv[2];
 
 if (!source) {
-	console.error(
-		"Source parameter missing. Usage: node JackAnalyzer.js <source> where source is a file or directory"
-	);
-	process.exit(1);
+    console.error(
+        "Source parameter missing. Usage: node JackAnalyzer.js <source> where source is a file or directory"
+    );
+    process.exit(1);
 }
 
-if (fs.lstatSync(source).isDirectory()) {
-	fs.readdir(source, (err, files) => {
-		if (err) {
-			console.error("Could not list the directory.");
-			process.exit(1);
-		}
-
-		
-		files.forEach(file => {			
-			if (path.extname(file) !== ".jack") return;
-
-			const finalFile = parseToXML(tokenize(path.join(source, file)));
-
-			fs.writeFileSync(path.join(source, `${file}.vm`), finalFile);
-		});
-
-	});
-} else {
-	const fileTokenized = parseToXML(tokenize(source));
-	fs.writeFileSync(source.replace(".jack", ".vm"), fileTokenized);
+function handleError(message, err) {
+    console.error(message, err);
 }
+
+function processFile(filePath) {
+    try {
+        const finalFile = parseToXML(tokenize(filePath));
+        fs.writeFileSync(filePath.replace(".jack", ".vm"), finalFile);
+    } catch (err) {
+        handleError(`Error processing file ${filePath}:`, err);
+    }
+}
+
+function processSource(sourcePath) {
+    try {
+        if (fs.lstatSync(sourcePath).isDirectory()) {
+            fs.readdir(sourcePath, (err, files) => {
+                if (err) {
+                    handleError("Could not list the directory.", err);
+                    process.exit(1);
+                }
+
+                files.forEach(file => {
+                    if (path.extname(file) === ".jack") {
+                        processFile(path.join(sourcePath, file));
+                    }
+                });
+            });
+        } else {
+            processFile(sourcePath);
+        }
+    } catch (err) {
+        handleError("Unexpected error:", err);
+    }
+}
+
+processSource(source);
