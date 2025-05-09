@@ -13,9 +13,9 @@ function writeArithmetic(command) {
 		case "-":
 			return "sub\n";
 		case "*":
-			return "call Math.multiply\n";
+			return "call Math.multiply 2\n";
 		case "/":
-			return "call Math.divide\n";
+			return "call Math.divide 2\n";
 		case "&":
 			return "and\n";
 		case "|":
@@ -27,7 +27,7 @@ function writeArithmetic(command) {
 		case "=":
 			return "eq\n";
 		case "not":
-			return "not\n"
+			return "not\n";
 	}
 }
 
@@ -47,8 +47,12 @@ function writeReturn() {
 	return "return\n";
 }
 
-function writeCall(f, n) {
-	return `call ${f} ${n}\n`;
+function writeCall(f, nArgs) {
+	return `call ${f} ${nArgs}\n`;
+}
+
+function writeFunction(name, nLocals) {
+	return `function ${name} ${nLocals}\n`;
 }
 
 module.exports = {
@@ -60,4 +64,5 @@ module.exports = {
 	writeIf,
 	writeReturn,
 	writeCall,
+	writeFunction,
 };

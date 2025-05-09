@@ -3,14 +3,14 @@ const symbolTable = require("./SymbolTable");
 const VMWriter = require("./VMWriter");
 
 function parseToXML(tokens, tab = 0, pointer = 0) {
-	const { xml } = compileClass(tokens, tab, pointer);
-	return xml;
+	const { code } = compileClass(tokens, tab, pointer);
+	return code;
 }
 
 function compileClass(tokens, tab, pointer) {
 	let code = "";
 
-	code += pointer++; // 'class'
+	pointer++; // 'class'
 
 	const className = tokens[pointer].value;
 	pointer++; // class name
@@ -28,9 +28,9 @@ function compileClass(tokens, tab, pointer) {
 		pointer = subroutineResult.pointer;
 	}
 
-	code += compileTerminalToken(tokens[pointer++], tab + 1); // '}'
+	pointer++; // '}'
 
-	return { xml: code, pointer };
+	return { code, pointer };
 }
 
 function compileSubroutine(tokens, tab, pointer, className) {
@@ -43,15 +43,17 @@ function compileSubroutine(tokens, tab, pointer, className) {
 	pointer++; // function return type
 	const subroutineName = tokens[pointer].value;
 	pointer++; // function name
+
 	pointer++; // '('
 
 	// Parameter list
-	const parameterList = compileParameterList(tokens, tab + 1, pointer, className);
-	code += parameterList.xml;
-	pointer = parameterList.pointer;
+	const parameterListResult = compileParameterList(tokens, tab + 1, pointer, className);
+	pointer = parameterListResult.pointer;
 
 	// Closing parenthesis
 	pointer++; // ')'
+
+	code += VMWriter.writeFunction(`${className}.${subroutineName}`, parameterListResult.count);
 
 	// Subroutine body
 	const body = compileSubroutineBody(tokens, tab + 1, pointer, className, subroutineName);
@@ -83,23 +85,23 @@ function compileTerminalToken(token, tab) {
 }
 
 function compileParameterList(tokens, tab, pointer, className) {
-	const tabs = "\t".repeat(tab);
-	let xml = `${tabs}<parameterList>\n`;
+	let code = "";
+	let count = 0;
 
 	while (tokens[pointer].value !== ")") {
-		xml += compileTerminalToken(tokens[pointer++], tab + 1); // parameter type
+		pointer++; // parameter type
 
 		const parameterName = tokens[pointer].value;
 		symbolTable.defineSubroutineSymbol(parameterName, className, "argument");
-		xml += compileTerminalToken(tokens[pointer++], tab + 1); // parameter name
+		pointer++; // parameter name
+		count++;
 
 		if (tokens[pointer].value === ",") {
-			xml += compileTerminalToken(tokens[pointer++], tab + 1); // comma separator
+			pointer++; // comma separator
 		}
 	}
 
-	xml += `${tabs}</parameterList>\n`;
-	return { xml, pointer };
+	return { code, pointer, count };
 }
 
 function compileSubroutineBody(tokens, tab, pointer, className, subroutineName) {
@@ -110,12 +112,12 @@ function compileSubroutineBody(tokens, tab, pointer, className, subroutineName) 
 	while (tokens[pointer].value === "var") {
 		// var declarations
 		const result = compileVarDec(tokens, tab + 1, pointer);
-		code += result.xml;
+		code += result.code;
 		pointer = result.pointer;
 	}
 
 	const statementsResult = compileStatements(tokens, tab + 1, pointer, className, subroutineName); // statements
-	code += statementsResult.xml;
+	code += statementsResult.code;
 	pointer = statementsResult.pointer;
 
 	pointer++; // }
@@ -174,71 +176,75 @@ function compileVarDec(tokens, tab, pointer) {
 }
 
 function compileStatements(tokens, tab, pointer, className, subroutineName) {
-	const tabs = "\t".repeat(tab);
-	let xml = `${tabs}<statements>\n`;
+	let code = "";
 	const label = `${className}.${subroutineName}`;
 
 	while (tokens[pointer].value !== "}") {
 		switch (tokens[pointer].value) {
 			case "do":
 				const doResult = compileDo(tokens, tab + 1, pointer);
-				xml += doResult.xml;
+				code += doResult.code;
 				pointer = doResult.pointer;
 				break;
 			case "let":
 				const letResult = compileLet(tokens, tab + 1, pointer);
-				xml += letResult.xml;
+				code += letResult.code;
 				pointer = letResult.pointer;
 				break;
 			case "while":
 				const whileResult = compileWhile(tokens, tab + 1, pointer, label);
-				xml += whileResult.xml;
+				code += whileResult.code;
 				pointer = whileResult.pointer;
 				break;
 			case "return":
 				const returnResult = compileReturn(tokens, tab + 1, pointer);
-				xml += returnResult.xml;
+				code += returnResult.code;
 				pointer = returnResult.pointer;
 				break;
 			case "if":
 				const ifResult = compileIf(tokens, tab + 1, pointer, label);
-				xml += ifResult.xml;
+				code += ifResult.code;
 				pointer = ifResult.pointer;
 				break;
 		}
 	}
-	xml += `${tabs}</statements>\n`;
-	return { xml, pointer };
+	return { code, pointer };
 }
 
-function compileDo(tokens, tab, pointer) {
+function compileDo(tokens, tab, pointer, className) {
 	// 'do' subroutineCall ';'
 
 	let code = "";
+	let f = "";
 
 	pointer++; // 'do'
+	const identifier = tokens[pointer].value;
+	f = `${className}.${identifier}`; // TODO: fix this duplicate reassignment to subroutineName in the two possible cases of do class.method() vs do method()
 	pointer++; // identifier (varName or subroutineName)
 
 	if (tokens[pointer].value === ".") {
 		pointer++; // '.'
+
+		f = `${identifier}.${tokens[pointer].value}`;
 		pointer++; // subroutine name
 	}
 
 	pointer++; // '('
 
 	// Expression list
-	const { xml: expressionListXML, pointer: expressionListPointer } = compileExpressionList(
-		tokens,
-		tab + 1,
-		pointer
-	);
-	code += expressionListXML;
+	const {
+		code: expressionListCode,
+		pointer: expressionListPointer,
+		count,
+	} = compileExpressionList(tokens, tab + 1, pointer);
+	code += expressionListCode;
 	pointer = expressionListPointer;
 
 	pointer++; // ')'
 	pointer++; // ';'
+	code += VMWriter.writeCall(f, count);
 
-	return { xml: code, pointer };
+	return { code, pointer };
 }
 
 function compileLet(tokens, tab, pointer) {
@@ -258,7 +264,7 @@ function compileLet(tokens, tab, pointer) {
 		code += compileTerminalToken(tokens[pointer++], tab + 1); // '['
 
 		const expressionResult = compileExpression(tokens, tab + 1, pointer);
-		code += expressionResult.xml;
+		code += expressionResult.code;
 		pointer = expressionResult.pointer;
 
 		code += compileTerminalToken(tokens[pointer++], tab + 1); // ']'
@@ -268,13 +274,13 @@ function compileLet(tokens, tab, pointer) {
 
 	// Expression
 	const expressionResult = compileExpression(tokens, tab + 1, pointer);
-	code += expressionResult.xml;
+	code += expressionResult.code;
 	pointer = expressionResult.pointer;
 
 	pointer++; // ';'
 	code += VMWriter.writePop(segment, index);
 
-	return { xml: code, pointer };
+	return { code, pointer };
 }
 
 function compileWhile(tokens, tab, pointer, label) {
@@ -290,7 +296,7 @@ function compileWhile(tokens, tab, pointer, label) {
 
 	// Expression
 	const expressionResult = compileExpression(tokens, tab + 1, pointer);
-	code += expressionResult.xml;
+	code += expressionResult.code;
 	pointer = expressionResult.pointer;
 
 	code += VMWriter.writeArithmetic("not");
@@ -301,14 +307,14 @@ function compileWhile(tokens, tab, pointer, label) {
 
 	// Statements
 	const statementsResult = compileStatements(tokens, tab + 1, pointer); // statements
-	code += statementsResult.xml;
+	code += statementsResult.code;
 	pointer = statementsResult.pointer;
 
 	pointer++; // '}'
 	code += VMWriter.writeGoto(whileLabel);
 	code += VMWriter.writeLabel(exitWhile);
 
-	return { xml: code, pointer };
+	return { code, pointer };
 }
 
 function compileReturn(tokens, tab, pointer) {
@@ -321,14 +327,14 @@ function compileReturn(tokens, tab, pointer) {
 	// Optional expression
 	if (tokens[pointer].value !== ";") {
 		const expressionResult = compileExpression(tokens, tab + 1, pointer);
-		code += expressionResult.xml;
+		code += expressionResult.code;
 		pointer = expressionResult.pointer;
 	}
 
 	code += VMWriter.writeReturn();
 	pointer++; // ;
 
-	return { xml: code, pointer };
+	return { code, pointer };
 }
 
 function compileIf(tokens, tab, pointer, label) {
@@ -341,7 +347,7 @@ function compileIf(tokens, tab, pointer, label) {
 
 	// Expression
 	const expressionResult = compileExpression(tokens, tab + 1, pointer);
-	code += expressionResult.xml;
+	code += expressionResult.code;
 	pointer = expressionResult.pointer;
 
 	code += VMWriter.writeArithmetic("not");
@@ -352,7 +358,7 @@ function compileIf(tokens, tab, pointer, label) {
 
 	// Statements
 	const statementsResult = compileStatements(tokens, tab + 1, pointer); // statements
-	code += statementsResult.xml;
+	code += statementsResult.code;
 	pointer = statementsResult.pointer;
 	pointer++; // '}'
 
@@ -366,14 +372,14 @@ function compileIf(tokens, tab, pointer, label) {
 
 		// Statements
 		const elseStatementsResult = compileStatements(tokens, tab + 1, pointer);
-		code += elseStatementsResult.xml;
+		code += elseStatementsResult.code;
 		pointer = elseStatementsResult.pointer;
 
 		pointer++; // '}'
 	}
 	code += VMWriter.writeLabel(endLabel);
 
-	return { xml: code, pointer };
+	return { code, pointer };
 }
 
 function compileExpression(tokens, tab, pointer) {
@@ -381,7 +387,7 @@ function compileExpression(tokens, tab, pointer) {
 
 	// Compile first term
 	const termResult = compileTerm(tokens, tab + 1, pointer);
-	code += termResult.xml;
+	code += termResult.code;
 	pointer = termResult.pointer;
 
 	// Compile (op term)* pattern
@@ -391,12 +397,12 @@ function compileExpression(tokens, tab, pointer) {
 
 		const nextTermResult = compileTerm(tokens, tab + 1, pointer);
 
-		code += nextTermResult.xml;
+		code += nextTermResult.code;
 		code += op;
 		pointer = nextTermResult.pointer;
 	}
 
-	return { xml: code, pointer };
+	return { code, pointer };
 }
 
 function compileTerm(tokens, tab, pointer) {
@@ -425,7 +431,7 @@ function compileTerm(tokens, tab, pointer) {
 		pointer++;
 
 		const termResult = compileTerm(tokens, tab + 1, pointer); // term
-		code += termResult.xml;
+		code += termResult.code;
 		code += op;
 
 		pointer = termResult.pointer;
@@ -435,7 +441,7 @@ function compileTerm(tokens, tab, pointer) {
 		pointer++; // '('
 
 		const expressionResult = compileExpression(tokens, tab + 1, pointer);
-		code += expressionResult.xml;
+		code += expressionResult.code;
 		pointer = expressionResult.pointer;
 
 		pointer++; // ')'
@@ -445,7 +451,7 @@ function compileTerm(tokens, tab, pointer) {
 		code += compileTerminalToken(tokens[pointer++], tab + 1); // identifier
 		code += compileTerminalToken(tokens[pointer++], tab + 1); // '['
 		const expressionResult = compileExpression(tokens, tab + 1, pointer);
-		code += expressionResult.xml;
+		code += expressionResult.code;
 		pointer = expressionResult.pointer;
 		code += compileTerminalToken(tokens[pointer++], tab + 1); // ']'
 	}
@@ -462,11 +468,11 @@ function compileTerm(tokens, tab, pointer) {
 
 		// Compile expression list (arguments)
 		const expListResult = compileExpressionList(tokens, tab + 1, pointer);
-		code += expListResult.xml;
+		code += expListResult.code;
 		pointer = expListResult.pointer;
 
 		pointer++; // ')
-		code += VMWriter.writeCall(subroutineName);
+		code += VMWriter.writeCall(subroutineName, expListResult.count);
 	}
 	// Subroutine call: subroutine()
 	else if (nextToken.value === "(") {
@@ -477,7 +483,7 @@ function compileTerm(tokens, tab, pointer) {
 
 		// Compile expression list (arguments)
 		const expListResult = compileExpressionList(tokens, tab + 1, pointer);
-		code += expListResult.xml;
+		code += expListResult.code;
 		pointer = expListResult.pointer;
 
 		pointer++; // ')'
@@ -492,20 +498,22 @@ function compileTerm(tokens, tab, pointer) {
 		code += VMWriter.writePush(segment === "field" ? "this" : segment, varName, index);
 	}
 
-	return { xml: code, pointer };
+	return { code, pointer };
 }
 
 function compileExpressionList(tokens, tab, pointer) {
 	let code = "";
+	let count = 0;
 
 	// Handle empty expression list (e.g., f())
 	if (tokens[pointer].value === ")") {
-		return { xml: code, pointer };
+		return { code, pointer, count };
 	}
 
 	while (true) {
+		count++;
 		const expResult = compileExpression(tokens, tab + 1, pointer);
-		code += expResult.xml;
+		code += expResult.code;
 		pointer = expResult.pointer;
 
 		if (tokens[pointer].value === ",") {
@@ -515,7 +523,7 @@ function compileExpressionList(tokens, tab, pointer) {
 		}
 	}
 
-	return { xml: code, pointer };
+	return { code, pointer, count };
 }
 
 function resolveVarName(varName) {
