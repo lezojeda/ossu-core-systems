@@ -8,62 +8,57 @@ function parseToXML(tokens, tab = 0, pointer = 0) {
 }
 
 function compileClass(tokens, tab, pointer) {
-	const tabs = "\t".repeat(tab);
-	let xml = `${tabs}<class>\n`;
+	let code = "";
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'class'
+	code += pointer++; // 'class'
 
 	const className = tokens[pointer].value;
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // class name
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '{'
+	pointer++; // class name
+	pointer++; // '{'
 
 	while (["static", "field"].includes(tokens[pointer]?.value)) {
 		const classVarDecResult = compileClassVarDec(tokens, tab + 1, pointer);
-		xml += classVarDecResult.xml;
+		code += classVarDecResult.code;
 		pointer = classVarDecResult.pointer;
 	}
 
 	while (["constructor", "function", "method"].includes(tokens[pointer]?.value)) {
 		const subroutineResult = compileSubroutine(tokens, tab + 1, pointer, className);
-		xml += subroutineResult.xml;
+		code += subroutineResult.code;
 		pointer = subroutineResult.pointer;
 	}
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '}'
-	xml += `${tabs}</class>\n`;
+	code += compileTerminalToken(tokens[pointer++], tab + 1); // '}'
 
-	return { xml, pointer };
+	return { xml: code, pointer };
 }
 
 function compileSubroutine(tokens, tab, pointer, className) {
-	symbolTable.startSubroutine();
+	symbolTable.startSubroutine(className);
 
-	const tabs = "\t".repeat(tab);
-	let xml = `${tabs}<subroutineDec>\n`;
+	let code = "";
 	symbolTable.defineSubroutineSymbol("this", className, "argument");
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'function'
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // function return type
+	pointer++; // 'function'
+	pointer++; // function return type
 	const subroutineName = tokens[pointer].value;
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // function name
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '('
+	pointer++; // function name
+	pointer++; // '('
 
 	// Parameter list
 	const parameterList = compileParameterList(tokens, tab + 1, pointer, className);
-	xml += parameterList.xml;
+	code += parameterList.xml;
 	pointer = parameterList.pointer;
 
 	// Closing parenthesis
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ')'
+	pointer++; // ')'
 
 	// Subroutine body
 	const body = compileSubroutineBody(tokens, tab + 1, pointer, className, subroutineName);
-	xml += body.xml;
+	code += body.code;
 	pointer = body.pointer;
 
-	xml += `${tabs}</subroutineDec>\n`;
-
-	return { xml, pointer };
+	return { code, pointer };
 }
 
 function compileTerminalToken(token, tab) {
@@ -108,80 +103,74 @@ function compileParameterList(tokens, tab, pointer, className) {
 }
 
 function compileSubroutineBody(tokens, tab, pointer, className, subroutineName) {
-	const tabs = "\t".repeat(tab);
-	let xml = `${tabs}<subroutineBody>\n`;
+	let code = "";
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // {
+	pointer++; // {
 
-	while (tokens[pointer]?.value === "var") {
+	while (tokens[pointer].value === "var") {
 		// var declarations
 		const result = compileVarDec(tokens, tab + 1, pointer);
-		xml += result.xml;
+		code += result.xml;
 		pointer = result.pointer;
 	}
 
 	const statementsResult = compileStatements(tokens, tab + 1, pointer, className, subroutineName); // statements
-	xml += statementsResult.xml;
+	code += statementsResult.xml;
 	pointer = statementsResult.pointer;
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // }
-	xml += `${tabs}</subroutineBody>\n`;
+	pointer++; // }
 
-	return { xml, pointer };
+	return { code, pointer };
 }
 
 function compileClassVarDec(tokens, tab, pointer) {
-	const tabs = "\t".repeat(tab);
-	let xml = `${tabs}<classVarDec>\n`;
+	let code = "";
 
 	// Parse kind and type
 	const kind = tokens[pointer].value; // 'static' or 'field'
-	xml += compileTerminalToken(tokens[pointer++], tab + 1);
+	code += compileTerminalToken(tokens[pointer++], tab + 1);
 
 	const type = tokens[pointer].value; // e.g., 'int' or 'boolean'
-	xml += compileTerminalToken(tokens[pointer++], tab + 1);
+	code += compileTerminalToken(tokens[pointer++], tab + 1);
 
 	// First varName
 	while (tokens[pointer].value !== ";") {
 		const name = tokens[pointer].value;
 
-		xml += compileTerminalToken(tokens[pointer++], tab + 1);
+		pointer++;
 		symbolTable.defineClassSymbol(name, type, kind);
 
 		if (tokens[pointer].value === ",") {
-			xml += compileTerminalToken(tokens[pointer++], tab + 1); // comma separator
+			pointer++; // comma separator
 		}
 	}
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ;
-	xml += `${tabs}</classVarDec>\n`;
-	return { xml, pointer };
+	pointer++; // ;
+	return { code, pointer };
 }
 
 function compileVarDec(tokens, tab, pointer) {
-	const tabs = "\t".repeat(tab);
-	let xml = `${tabs}<varDec>\n`;
+	let code = "";
 
 	// Parse kind and type
-	xml += compileTerminalToken(tokens[pointer++], tab + 1);
+	pointer++; // 'var'
 
 	const type = tokens[pointer].value;
-	xml += compileTerminalToken(tokens[pointer++], tab + 1);
+	pointer++; // type
 
 	while (tokens[pointer].value !== ";") {
 		const name = tokens[pointer].value;
 
-		xml += compileTerminalToken(tokens[pointer++], tab + 1);
+		pointer++; // varName
 		symbolTable.defineSubroutineSymbol(name, type, "local");
 
 		if (tokens[pointer].value === ",") {
-			xml += compileTerminalToken(tokens[pointer++], tab + 1); // comma separator
+			pointer++; // ','
 		}
 	}
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ;
-	xml += `${tabs}</varDec>\n`;
-	return { xml, pointer };
+	pointer++; // ;
+	return { code, pointer };
 }
 
 function compileStatements(tokens, tab, pointer, className, subroutineName) {
@@ -225,18 +214,17 @@ function compileStatements(tokens, tab, pointer, className, subroutineName) {
 function compileDo(tokens, tab, pointer) {
 	// 'do' subroutineCall ';'
 
-	const tabs = "\t".repeat(tab);
-	let xml = `${tabs}<doStatement>\n`;
+	let code = "";
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'do'
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // identifier (varName or subroutineName)
+	pointer++; // 'do'
+	pointer++; // identifier (varName or subroutineName)
 
 	if (tokens[pointer].value === ".") {
-		xml += compileTerminalToken(tokens[pointer++], tab + 1); // '.'
-		xml += compileTerminalToken(tokens[pointer++], tab + 1); // subroutine name
+		pointer++; // '.'
+		pointer++; // subroutine name
 	}
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '('
+	pointer++; // '('
 
 	// Expression list
 	const { xml: expressionListXML, pointer: expressionListPointer } = compileExpressionList(
@@ -244,45 +232,49 @@ function compileDo(tokens, tab, pointer) {
 		tab + 1,
 		pointer
 	);
-	xml += expressionListXML;
+	code += expressionListXML;
 	pointer = expressionListPointer;
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ')'
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ';'
-	xml += `${tabs}</doStatement>\n`;
+	pointer++; // ')'
+	pointer++; // ';'
 
-	return { xml, pointer };
+	return { xml: code, pointer };
 }
 
 function compileLet(tokens, tab, pointer) {
 	// 'let' varName ('[' expression ']')? '=' expression ';'
 
-	const tabs = "\t".repeat(tab);
-	let xml = `${tabs}<letStatement>\n`;
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'let'
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // varName
+	let code = "";
+	pointer++; // 'let'
+
+	// resolve varname to write pop at the end
+	const varName = tokens[pointer].value;
+
+	const { segment, index } = resolveVarName(varName);
+
+	pointer++; // varName
 
 	if (tokens[pointer].value === "[") {
-		xml += compileTerminalToken(tokens[pointer++], tab + 1); // '['
+		code += compileTerminalToken(tokens[pointer++], tab + 1); // '['
 
 		const expressionResult = compileExpression(tokens, tab + 1, pointer);
-		xml += expressionResult.xml;
+		code += expressionResult.xml;
 		pointer = expressionResult.pointer;
 
-		xml += compileTerminalToken(tokens[pointer++], tab + 1); // ']'
+		code += compileTerminalToken(tokens[pointer++], tab + 1); // ']'
 	}
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '='
+	pointer++; // '='
 
 	// Expression
 	const expressionResult = compileExpression(tokens, tab + 1, pointer);
-	xml += expressionResult.xml;
+	code += expressionResult.xml;
 	pointer = expressionResult.pointer;
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ';'
-	xml += `${tabs}</letStatement>\n`;
+	pointer++; // ';'
+	code += VMWriter.writePop(segment, index);
 
-	return { xml, pointer };
+	return { xml: code, pointer };
 }
 
 function compileWhile(tokens, tab, pointer, label) {
@@ -322,21 +314,21 @@ function compileWhile(tokens, tab, pointer, label) {
 function compileReturn(tokens, tab, pointer) {
 	// 'return' expression? ';'
 
-	const tabs = "\t".repeat(tab);
-	let xml = `${tabs}<returnStatement>\n`;
+	let code = "";
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'return'
+	pointer++; // 'return'
 
 	// Optional expression
 	if (tokens[pointer].value !== ";") {
 		const expressionResult = compileExpression(tokens, tab + 1, pointer);
-		xml += expressionResult.xml;
+		code += expressionResult.xml;
 		pointer = expressionResult.pointer;
 	}
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ;
-	xml += `${tabs}</returnStatement>\n`;
-	return { xml, pointer };
+	code += VMWriter.writeReturn();
+	pointer++; // ;
+
+	return { xml: code, pointer };
 }
 
 function compileIf(tokens, tab, pointer, label) {
@@ -419,9 +411,13 @@ function compileTerm(tokens, tab, pointer) {
 	// String constant, keyword constant, or simple identifier
 	else if (
 		tokens[pointer].tokenType === "STRING_CONST" ||
-		["true", "false", "null", "this"].includes(tokens[pointer].value)
+		["true", "this"].includes(tokens[pointer].value)
 	) {
 		code += compileTerminalToken(tokens[pointer++], tab + 1);
+	}
+	// null/false
+	else if (["false", "null"].includes(tokens[pointer].value)) {
+		code += VMWriter.writePush("constant", 0);
 	}
 	// Unary operator term "op exp"
 	else if (["-", "~"].includes(tokens[pointer].value)) {
@@ -489,19 +485,11 @@ function compileTerm(tokens, tab, pointer) {
 	}
 	// Simple variable name
 	else {
-		// Resolve varName to segment
 		const varName = tokens[pointer++].value;
 
-		const entry =
-			symbolTable["subroutine"].table[varName] ?? symbolTable["class"].table[varName];
+		const { segment, index } = resolveVarName(varName);
 
-		if (!entry) {
-			throw `${varName} is not defined`;
-		}
-
-		const segment = entry.kind;
-
-		code += VMWriter.writePush(segment === "field" ? "this" : segment, varName);
+		code += VMWriter.writePush(segment === "field" ? "this" : segment, varName, index);
 	}
 
 	return { xml: code, pointer };
@@ -528,6 +516,16 @@ function compileExpressionList(tokens, tab, pointer) {
 	}
 
 	return { xml: code, pointer };
+}
+
+function resolveVarName(varName) {
+	const entry = symbolTable["subroutine"].table[varName] ?? symbolTable["class"].table[varName];
+
+	if (!entry) {
+		throw `${varName} is not defined`;
+	}
+
+	return { segment: entry.kind === "field" ? "this" : entry.kind, ...entry };
 }
 
 module.exports = { parseToXML };
