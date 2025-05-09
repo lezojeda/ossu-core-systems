@@ -44,6 +44,7 @@ function compileSubroutine(tokens, tab, pointer, className) {
 
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'function'
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // function return type
+	const subroutineName = tokens[pointer].value;
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // function name
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '('
 
@@ -56,7 +57,7 @@ function compileSubroutine(tokens, tab, pointer, className) {
 	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ')'
 
 	// Subroutine body
-	const body = compileSubroutineBody(tokens, tab + 1, pointer);
+	const body = compileSubroutineBody(tokens, tab + 1, pointer, className, subroutineName);
 	xml += body.xml;
 	pointer = body.pointer;
 
@@ -106,7 +107,7 @@ function compileParameterList(tokens, tab, pointer, className) {
 	return { xml, pointer };
 }
 
-function compileSubroutineBody(tokens, tab, pointer) {
+function compileSubroutineBody(tokens, tab, pointer, className, subroutineName) {
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<subroutineBody>\n`;
 
@@ -119,7 +120,7 @@ function compileSubroutineBody(tokens, tab, pointer) {
 		pointer = result.pointer;
 	}
 
-	const statementsResult = compileStatements(tokens, tab + 1, pointer); // statements
+	const statementsResult = compileStatements(tokens, tab + 1, pointer, className, subroutineName); // statements
 	xml += statementsResult.xml;
 	pointer = statementsResult.pointer;
 
@@ -183,9 +184,10 @@ function compileVarDec(tokens, tab, pointer) {
 	return { xml, pointer };
 }
 
-function compileStatements(tokens, tab, pointer) {
+function compileStatements(tokens, tab, pointer, className, subroutineName) {
 	const tabs = "\t".repeat(tab);
 	let xml = `${tabs}<statements>\n`;
+	const label = `${className}.${subroutineName}`;
 
 	while (tokens[pointer].value !== "}") {
 		switch (tokens[pointer].value) {
@@ -210,7 +212,7 @@ function compileStatements(tokens, tab, pointer) {
 				pointer = returnResult.pointer;
 				break;
 			case "if":
-				const ifResult = compileIf(tokens, tab + 1, pointer);
+				const ifResult = compileIf(tokens, tab + 1, pointer, label);
 				xml += ifResult.xml;
 				pointer = ifResult.pointer;
 				break;
@@ -331,7 +333,9 @@ function compileReturn(tokens, tab, pointer) {
 	return { xml, pointer };
 }
 
-function compileIf(tokens, tab, pointer) {
+function compileIf(tokens, tab, pointer, label) {
+	const falseLabel = `${label}.IF_FALSE.${pointer}`;
+	const endLabel = `${label}.IF_END.${pointer}`;
 	let code = "";
 
 	code += compileTerminalToken(tokens[pointer++], tab + 1); // 'if'
@@ -339,10 +343,12 @@ function compileIf(tokens, tab, pointer) {
 
 	// Expression
 	const expressionResult = compileExpression(tokens, tab + 1, pointer);
-	VMWriter.writeArithmetic("not");
-	VMWriter.writeIf()
 	code += expressionResult.xml;
 	pointer = expressionResult.pointer;
+
+	code += VMWriter.writeArithmetic("not");
+	code += VMWriter.writeIf(falseLabel);
+
 	pointer++; // ')'
 	pointer++; // '{'
 
@@ -350,18 +356,24 @@ function compileIf(tokens, tab, pointer) {
 	const statementsResult = compileStatements(tokens, tab + 1, pointer); // statements
 	code += statementsResult.xml;
 	pointer = statementsResult.pointer;
-	code += compileTerminalToken(tokens[pointer++], tab + 1); // '}'
+	pointer++; // '}'
 
+	code += VMWriter.writeGoto(endLabel);
+
+	code += VMWriter.writeLabel(falseLabel);
 	// Handle optional else clause
 	if (tokens[pointer]?.value === "else") {
-		code += compileTerminalToken(tokens[pointer++], tab + 1); // 'else'
-		code += compileTerminalToken(tokens[pointer++], tab + 1); // '{'
+		pointer++; // 'else'
+		pointer++; // '{'
+
 		// Statements
 		const elseStatementsResult = compileStatements(tokens, tab + 1, pointer);
 		code += elseStatementsResult.xml;
 		pointer = elseStatementsResult.pointer;
-		code += compileTerminalToken(tokens[pointer++], tab + 1); // '}'
+
+		pointer++; // '}'
 	}
+	code += VMWriter.writeLabel(endLabel);
 
 	return { xml: code, pointer };
 }

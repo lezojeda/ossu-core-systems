@@ -27,7 +27,7 @@ function writeArithmetic(command) {
 		case "=":
 			return "eq\n";
 		case "not":
-			return "not;"
+			return "not\n"
 	}
 }
 
@@ -47,8 +47,8 @@ function writeReturn() {
 	return "return\n";
 }
 
-function writeCall(f) {
-	return `call ${f}\n`;
+function writeCall(f, n) {
+	return `call ${f} ${n}\n`;
 }
 
 module.exports = {
