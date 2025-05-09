@@ -202,7 +202,7 @@ function compileStatements(tokens, tab, pointer, className, subroutineName) {
 				pointer = letResult.pointer;
 				break;
 			case "while":
-				const whileResult = compileWhile(tokens, tab + 1, pointer);
+				const whileResult = compileWhile(tokens, tab + 1, pointer, label);
 				xml += whileResult.xml;
 				pointer = whileResult.pointer;
 				break;
@@ -285,32 +285,38 @@ function compileLet(tokens, tab, pointer) {
 	return { xml, pointer };
 }
 
-function compileWhile(tokens, tab, pointer) {
+function compileWhile(tokens, tab, pointer, label) {
 	// 'while' '(' expression ')' '{' statements '}'
+	const whileLabel = `${label}.WHILE.${pointer}`;
+	const exitWhile = `${label}.EXIT_WHILE.${pointer}`;
 
-	const tabs = "\t".repeat(tab);
-	let xml = `${tabs}<whileStatement>\n`;
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // 'while'
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '('
+	let code = "";
+	pointer++; // 'while'
+	pointer++; // '('
+
+	code += VMWriter.writeLabel(whileLabel);
 
 	// Expression
 	const expressionResult = compileExpression(tokens, tab + 1, pointer);
-	xml += expressionResult.xml;
+	code += expressionResult.xml;
 	pointer = expressionResult.pointer;
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // ')'
+	code += VMWriter.writeArithmetic("not");
+	code += VMWriter.writeIf(exitWhile);
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '{'
+	pointer++; // ')'
+	pointer++; // '{'
 
 	// Statements
 	const statementsResult = compileStatements(tokens, tab + 1, pointer); // statements
-	xml += statementsResult.xml;
+	code += statementsResult.xml;
 	pointer = statementsResult.pointer;
 
-	xml += compileTerminalToken(tokens[pointer++], tab + 1); // '}'
-	xml += `${tabs}</whileStatement>\n`;
+	pointer++; // '}'
+	code += VMWriter.writeGoto(whileLabel);
+	code += VMWriter.writeLabel(exitWhile);
 
-	return { xml, pointer };
+	return { xml: code, pointer };
 }
 
 function compileReturn(tokens, tab, pointer) {
