@@ -218,31 +218,10 @@ function compileDo(tokens, tab, pointer, className) {
 	let f = "";
 
 	pointer++; // 'do'
-	const identifier = tokens[pointer].value;
-	f = `${className}.${identifier}`; // TODO: fix this duplicate reassignment to subroutineName in the two possible cases of do class.method() vs do method()
-	pointer++; // identifier (varName or subroutineName)
 
-	if (tokens[pointer].value === ".") {
-		pointer++; // '.'
-
-		f = `${identifier}.${tokens[pointer].value}`;
-		pointer++; // subroutine name
-	}
-
-	pointer++; // '('
-
-	// Expression list
-	const {
-		code: expressionListCode,
-		pointer: expressionListPointer,
-		count,
-	} = compileExpressionList(tokens, tab + 1, pointer);
-	code += expressionListCode;
-	pointer = expressionListPointer;
-
-	pointer++; // ')'
-	pointer++; // ';'
-	code += VMWriter.writeCall(f, count);
+	const subroutineCallResult = compileSubroutineCall(tokens, pointer);
+	code += subroutineCallResult.code;
+	pointer = subroutineCallResult.pointer;
 
 	return { code, pointer };
 }
@@ -455,39 +434,11 @@ function compileTerm(tokens, tab, pointer) {
 		pointer = expressionResult.pointer;
 		code += compileTerminalToken(tokens[pointer++], tab + 1); // ']'
 	}
-	// Class subroutine call: ClassName.subroutine()
-	else if (nextToken.value === ".") {
-		let identifier = tokens[pointer].value;
-		pointer++; // class identifier
-
-		pointer++; // '.'
-		const subroutineName = tokens[pointer].value;
-		pointer++;
-
-		pointer++; // '('
-
-		// Compile expression list (arguments)
-		const expListResult = compileExpressionList(tokens, tab + 1, pointer);
-		code += expListResult.code;
-		pointer = expListResult.pointer;
-
-		pointer++; // ')
-		code += VMWriter.writeCall(subroutineName, expListResult.count);
-	}
-	// Subroutine call: subroutine()
-	else if (nextToken.value === "(") {
-		const subroutineName = tokens[pointer].value;
-		pointer++;
-
-		pointer++; // '('
-
-		// Compile expression list (arguments)
-		const expListResult = compileExpressionList(tokens, tab + 1, pointer);
-		code += expListResult.code;
-		pointer = expListResult.pointer;
-
-		pointer++; // ')'
-		code += VMWriter.writeCall(subroutineName);
+	// Class subroutine call ClassName.identifier() or subroutine call identifier()
+	else if (nextToken.value === "." || nextToken.value === "(") {
+		const subroutineCallResult = compileSubroutineCall(tokens, pointer);
+		code += subroutineCallResult.code;
+		pointer = subroutineCallResult.pointer;	
 	}
 	// Simple variable name
 	else {
@@ -524,6 +475,34 @@ function compileExpressionList(tokens, tab, pointer) {
 	}
 
 	return { code, pointer, count };
+}
+
+function compileSubroutineCall(tokens, pointer) {
+	const identifier = tokens[pointer].value;
+	f = `${className}.${identifier}`; // TODO: fix this duplicate reassignment to subroutineName in the two possible cases of do class.method() vs do method()
+	pointer++; // identifier (varName or subroutineName)
+
+	if (tokens[pointer].value === ".") {
+		pointer++; // '.'
+
+		f = `${identifier}.${tokens[pointer].value}`;
+		pointer++; // subroutine name
+	}
+
+	pointer++; // '('
+
+	// Expression list
+	const {
+		code: expressionListCode,
+		pointer: expressionListPointer,
+		count,
+	} = compileExpressionList(tokens, tab + 1, pointer);
+	code += expressionListCode;
+	pointer = expressionListPointer;
+
+	pointer++; // ')'
+	pointer++; // ';'
+	return { code: VMWriter.writeCall(f, count), pointer };
 }
 
 function resolveVarName(varName) {
