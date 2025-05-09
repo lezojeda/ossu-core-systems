@@ -2,12 +2,12 @@ const operators = require("./operators");
 const symbolTable = require("./SymbolTable");
 const VMWriter = require("./VMWriter");
 
-function parseToXML(tokens, tab = 0, pointer = 0) {
-	const { code } = compileClass(tokens, tab, pointer);
+function parseToXML(tokens, pointer = 0) {
+	const { code } = compileClass(tokens, pointer);
 	return code;
 }
 
-function compileClass(tokens, tab, pointer) {
+function compileClass(tokens, pointer) {
 	let code = "";
 
 	pointer++; // 'class'
@@ -17,13 +17,13 @@ function compileClass(tokens, tab, pointer) {
 	pointer++; // '{'
 
 	while (["static", "field"].includes(tokens[pointer]?.value)) {
-		const classVarDecResult = compileClassVarDec(tokens, tab + 1, pointer);
+		const classVarDecResult = compileClassVarDec(tokens, pointer);
 		code += classVarDecResult.code;
 		pointer = classVarDecResult.pointer;
 	}
 
 	while (["constructor", "function", "method"].includes(tokens[pointer]?.value)) {
-		const subroutineResult = compileSubroutine(tokens, tab + 1, pointer, className);
+		const subroutineResult = compileSubroutine(tokens, pointer, className);
 		code += subroutineResult.code;
 		pointer = subroutineResult.pointer;
 	}
@@ -33,7 +33,7 @@ function compileClass(tokens, tab, pointer) {
 	return { code, pointer };
 }
 
-function compileSubroutine(tokens, tab, pointer, className) {
+function compileSubroutine(tokens, pointer, className) {
 	symbolTable.startSubroutine(className);
 
 	let code = "";
@@ -47,7 +47,7 @@ function compileSubroutine(tokens, tab, pointer, className) {
 	pointer++; // '('
 
 	// Parameter list
-	const parameterListResult = compileParameterList(tokens, tab + 1, pointer, className);
+	const parameterListResult = compileParameterList(tokens, pointer, className);
 	pointer = parameterListResult.pointer;
 
 	// Closing parenthesis
@@ -56,14 +56,14 @@ function compileSubroutine(tokens, tab, pointer, className) {
 	code += VMWriter.writeFunction(`${className}.${subroutineName}`, parameterListResult.count);
 
 	// Subroutine body
-	const body = compileSubroutineBody(tokens, tab + 1, pointer, className, subroutineName);
+	const body = compileSubroutineBody(tokens, pointer, className, subroutineName);
 	code += body.code;
 	pointer = body.pointer;
 
 	return { code, pointer };
 }
 
-function compileTerminalToken(token, tab) {
+function compileTerminalToken(token) {
 	const { tokenType, value } = token;
 	let tag =
 		tokenType === "INT_CONST"
@@ -80,11 +80,10 @@ function compileTerminalToken(token, tab) {
 		else if (value === "&") escapedValue = "&amp;";
 	}
 
-	const tabs = "\t".repeat(tab);
-	return `${tabs}<${tag}> ${escapedValue} </${tag}>\n`;
+	return `<${tag}> ${escapedValue} </${tag}>\n`;
 }
 
-function compileParameterList(tokens, tab, pointer, className) {
+function compileParameterList(tokens, pointer, className) {
 	let code = "";
 	let count = 0;
 
@@ -104,19 +103,19 @@ function compileParameterList(tokens, tab, pointer, className) {
 	return { code, pointer, count };
 }
 
-function compileSubroutineBody(tokens, tab, pointer, className, subroutineName) {
+function compileSubroutineBody(tokens, pointer, className, subroutineName) {
 	let code = "";
 
 	pointer++; // {
 
 	while (tokens[pointer].value === "var") {
 		// var declarations
-		const result = compileVarDec(tokens, tab + 1, pointer);
+		const result = compileVarDec(tokens, pointer);
 		code += result.code;
 		pointer = result.pointer;
 	}
 
-	const statementsResult = compileStatements(tokens, tab + 1, pointer, className, subroutineName); // statements
+	const statementsResult = compileStatements(tokens, pointer, className, subroutineName); // statements
 	code += statementsResult.code;
 	pointer = statementsResult.pointer;
 
@@ -125,15 +124,15 @@ function compileSubroutineBody(tokens, tab, pointer, className, subroutineName) 
 	return { code, pointer };
 }
 
-function compileClassVarDec(tokens, tab, pointer) {
+function compileClassVarDec(tokens, pointer) {
 	let code = "";
 
 	// Parse kind and type
 	const kind = tokens[pointer].value; // 'static' or 'field'
-	code += compileTerminalToken(tokens[pointer++], tab + 1);
+	pointer++;
 
 	const type = tokens[pointer].value; // e.g., 'int' or 'boolean'
-	code += compileTerminalToken(tokens[pointer++], tab + 1);
+	pointer++;
 
 	// First varName
 	while (tokens[pointer].value !== ";") {
@@ -151,7 +150,7 @@ function compileClassVarDec(tokens, tab, pointer) {
 	return { code, pointer };
 }
 
-function compileVarDec(tokens, tab, pointer) {
+function compileVarDec(tokens, pointer) {
 	let code = "";
 
 	// Parse kind and type
@@ -175,34 +174,34 @@ function compileVarDec(tokens, tab, pointer) {
 	return { code, pointer };
 }
 
-function compileStatements(tokens, tab, pointer, className, subroutineName) {
+function compileStatements(tokens, pointer, className, subroutineName) {
 	let code = "";
 	const label = `${className}.${subroutineName}`;
 
 	while (tokens[pointer].value !== "}") {
 		switch (tokens[pointer].value) {
 			case "do":
-				const doResult = compileDo(tokens, tab + 1, pointer);
+				const doResult = compileDo(tokens, pointer, className);
 				code += doResult.code;
 				pointer = doResult.pointer;
 				break;
 			case "let":
-				const letResult = compileLet(tokens, tab + 1, pointer);
+				const letResult = compileLet(tokens, pointer, className);
 				code += letResult.code;
 				pointer = letResult.pointer;
 				break;
 			case "while":
-				const whileResult = compileWhile(tokens, tab + 1, pointer, label);
+				const whileResult = compileWhile(tokens, pointer, label, className);
 				code += whileResult.code;
 				pointer = whileResult.pointer;
 				break;
 			case "return":
-				const returnResult = compileReturn(tokens, tab + 1, pointer);
+				const returnResult = compileReturn(tokens, pointer, className);
 				code += returnResult.code;
 				pointer = returnResult.pointer;
 				break;
 			case "if":
-				const ifResult = compileIf(tokens, tab + 1, pointer, label);
+				const ifResult = compileIf(tokens, pointer, label, className);
 				code += ifResult.code;
 				pointer = ifResult.pointer;
 				break;
@@ -211,7 +210,7 @@ function compileStatements(tokens, tab, pointer, className, subroutineName) {
 	return { code, pointer };
 }
 
-function compileDo(tokens, tab, pointer, className) {
+function compileDo(tokens, pointer, className) {
 	// 'do' subroutineCall ';'
 
 	let code = "";
@@ -219,14 +218,14 @@ function compileDo(tokens, tab, pointer, className) {
 
 	pointer++; // 'do'
 
-	const subroutineCallResult = compileSubroutineCall(tokens, pointer);
+	const subroutineCallResult = compileSubroutineCall(tokens, pointer, className);
 	code += subroutineCallResult.code;
 	pointer = subroutineCallResult.pointer;
 
 	return { code, pointer };
 }
 
-function compileLet(tokens, tab, pointer) {
+function compileLet(tokens, pointer, className) {
 	// 'let' varName ('[' expression ']')? '=' expression ';'
 
 	let code = "";
@@ -240,19 +239,19 @@ function compileLet(tokens, tab, pointer) {
 	pointer++; // varName
 
 	if (tokens[pointer].value === "[") {
-		code += compileTerminalToken(tokens[pointer++], tab + 1); // '['
+		code += compileTerminalToken(tokens[pointer++]); // '['
 
-		const expressionResult = compileExpression(tokens, tab + 1, pointer);
+		const expressionResult = compileExpression(tokens, pointer, className);
 		code += expressionResult.code;
 		pointer = expressionResult.pointer;
 
-		code += compileTerminalToken(tokens[pointer++], tab + 1); // ']'
+		code += compileTerminalToken(tokens[pointer++]); // ']'
 	}
 
 	pointer++; // '='
 
 	// Expression
-	const expressionResult = compileExpression(tokens, tab + 1, pointer);
+	const expressionResult = compileExpression(tokens, pointer, className);
 	code += expressionResult.code;
 	pointer = expressionResult.pointer;
 
@@ -262,7 +261,7 @@ function compileLet(tokens, tab, pointer) {
 	return { code, pointer };
 }
 
-function compileWhile(tokens, tab, pointer, label) {
+function compileWhile(tokens, pointer, label, className) {
 	// 'while' '(' expression ')' '{' statements '}'
 	const whileLabel = `${label}.WHILE.${pointer}`;
 	const exitWhile = `${label}.EXIT_WHILE.${pointer}`;
@@ -274,7 +273,7 @@ function compileWhile(tokens, tab, pointer, label) {
 	code += VMWriter.writeLabel(whileLabel);
 
 	// Expression
-	const expressionResult = compileExpression(tokens, tab + 1, pointer);
+	const expressionResult = compileExpression(tokens, pointer, className);
 	code += expressionResult.code;
 	pointer = expressionResult.pointer;
 
@@ -285,7 +284,7 @@ function compileWhile(tokens, tab, pointer, label) {
 	pointer++; // '{'
 
 	// Statements
-	const statementsResult = compileStatements(tokens, tab + 1, pointer); // statements
+	const statementsResult = compileStatements(tokens, pointer); // statements
 	code += statementsResult.code;
 	pointer = statementsResult.pointer;
 
@@ -296,7 +295,7 @@ function compileWhile(tokens, tab, pointer, label) {
 	return { code, pointer };
 }
 
-function compileReturn(tokens, tab, pointer) {
+function compileReturn(tokens, pointer, className) {
 	// 'return' expression? ';'
 
 	let code = "";
@@ -305,7 +304,7 @@ function compileReturn(tokens, tab, pointer) {
 
 	// Optional expression
 	if (tokens[pointer].value !== ";") {
-		const expressionResult = compileExpression(tokens, tab + 1, pointer);
+		const expressionResult = compileExpression(tokens, pointer, className);
 		code += expressionResult.code;
 		pointer = expressionResult.pointer;
 	}
@@ -316,16 +315,16 @@ function compileReturn(tokens, tab, pointer) {
 	return { code, pointer };
 }
 
-function compileIf(tokens, tab, pointer, label) {
+function compileIf(tokens, pointer, label, className) {
 	const falseLabel = `${label}.IF_FALSE.${pointer}`;
 	const endLabel = `${label}.IF_END.${pointer}`;
 	let code = "";
 
-	code += compileTerminalToken(tokens[pointer++], tab + 1); // 'if'
-	code += compileTerminalToken(tokens[pointer++], tab + 1); // '('
+	pointer++; // 'if'
+	pointer++; // '('
 
 	// Expression
-	const expressionResult = compileExpression(tokens, tab + 1, pointer);
+	const expressionResult = compileExpression(tokens, pointer, className);
 	code += expressionResult.code;
 	pointer = expressionResult.pointer;
 
@@ -336,7 +335,7 @@ function compileIf(tokens, tab, pointer, label) {
 	pointer++; // '{'
 
 	// Statements
-	const statementsResult = compileStatements(tokens, tab + 1, pointer); // statements
+	const statementsResult = compileStatements(tokens, pointer); // statements
 	code += statementsResult.code;
 	pointer = statementsResult.pointer;
 	pointer++; // '}'
@@ -350,7 +349,7 @@ function compileIf(tokens, tab, pointer, label) {
 		pointer++; // '{'
 
 		// Statements
-		const elseStatementsResult = compileStatements(tokens, tab + 1, pointer);
+		const elseStatementsResult = compileStatements(tokens, pointer);
 		code += elseStatementsResult.code;
 		pointer = elseStatementsResult.pointer;
 
@@ -361,11 +360,11 @@ function compileIf(tokens, tab, pointer, label) {
 	return { code, pointer };
 }
 
-function compileExpression(tokens, tab, pointer) {
+function compileExpression(tokens, pointer, className) {
 	let code = "";
 
 	// Compile first term
-	const termResult = compileTerm(tokens, tab + 1, pointer);
+	const termResult = compileTerm(tokens, pointer, className);
 	code += termResult.code;
 	pointer = termResult.pointer;
 
@@ -374,7 +373,7 @@ function compileExpression(tokens, tab, pointer) {
 		const op = VMWriter.writeArithmetic(tokens[pointer]?.value);
 		pointer++;
 
-		const nextTermResult = compileTerm(tokens, tab + 1, pointer);
+		const nextTermResult = compileTerm(tokens, pointer, className);
 
 		code += nextTermResult.code;
 		code += op;
@@ -384,7 +383,7 @@ function compileExpression(tokens, tab, pointer) {
 	return { code, pointer };
 }
 
-function compileTerm(tokens, tab, pointer) {
+function compileTerm(tokens, pointer, className) {
 	let code = "";
 
 	const nextToken = tokens[pointer + 1] || {};
@@ -398,7 +397,7 @@ function compileTerm(tokens, tab, pointer) {
 		tokens[pointer].tokenType === "STRING_CONST" ||
 		["true", "this"].includes(tokens[pointer].value)
 	) {
-		code += compileTerminalToken(tokens[pointer++], tab + 1);
+		code += compileTerminalToken(tokens[pointer++]);
 	}
 	// null/false
 	else if (["false", "null"].includes(tokens[pointer].value)) {
@@ -409,7 +408,7 @@ function compileTerm(tokens, tab, pointer) {
 		const op = VMWriter.writeArithmetic(tokens[pointer]?.value); // unary op
 		pointer++;
 
-		const termResult = compileTerm(tokens, tab + 1, pointer); // term
+		const termResult = compileTerm(tokens, pointer, className); // term
 		code += termResult.code;
 		code += op;
 
@@ -419,7 +418,7 @@ function compileTerm(tokens, tab, pointer) {
 	else if (tokens[pointer].value === "(") {
 		pointer++; // '('
 
-		const expressionResult = compileExpression(tokens, tab + 1, pointer);
+		const expressionResult = compileExpression(tokens, pointer, className);
 		code += expressionResult.code;
 		pointer = expressionResult.pointer;
 
@@ -427,18 +426,18 @@ function compileTerm(tokens, tab, pointer) {
 	}
 	// Array access: varName[expression]
 	else if (nextToken.value === "[") {
-		code += compileTerminalToken(tokens[pointer++], tab + 1); // identifier
-		code += compileTerminalToken(tokens[pointer++], tab + 1); // '['
-		const expressionResult = compileExpression(tokens, tab + 1, pointer);
+		code += compileTerminalToken(tokens[pointer++]); // identifier
+		code += compileTerminalToken(tokens[pointer++]); // '['
+		const expressionResult = compileExpression(tokens, pointer, className);
 		code += expressionResult.code;
 		pointer = expressionResult.pointer;
-		code += compileTerminalToken(tokens[pointer++], tab + 1); // ']'
+		code += compileTerminalToken(tokens[pointer++]); // ']'
 	}
 	// Class subroutine call ClassName.identifier() or subroutine call identifier()
 	else if (nextToken.value === "." || nextToken.value === "(") {
-		const subroutineCallResult = compileSubroutineCall(tokens, pointer);
+		const subroutineCallResult = compileSubroutineCall(tokens, pointer, className);
 		code += subroutineCallResult.code;
-		pointer = subroutineCallResult.pointer;	
+		pointer = subroutineCallResult.pointer;
 	}
 	// Simple variable name
 	else {
@@ -452,7 +451,7 @@ function compileTerm(tokens, tab, pointer) {
 	return { code, pointer };
 }
 
-function compileExpressionList(tokens, tab, pointer) {
+function compileExpressionList(tokens, pointer, className) {
 	let code = "";
 	let count = 0;
 
@@ -463,7 +462,7 @@ function compileExpressionList(tokens, tab, pointer) {
 
 	while (true) {
 		count++;
-		const expResult = compileExpression(tokens, tab + 1, pointer);
+		const expResult = compileExpression(tokens, pointer, className);
 		code += expResult.code;
 		pointer = expResult.pointer;
 
@@ -477,7 +476,8 @@ function compileExpressionList(tokens, tab, pointer) {
 	return { code, pointer, count };
 }
 
-function compileSubroutineCall(tokens, pointer) {
+function compileSubroutineCall(tokens, pointer, className) {
+	let code = "";
 	const identifier = tokens[pointer].value;
 	f = `${className}.${identifier}`; // TODO: fix this duplicate reassignment to subroutineName in the two possible cases of do class.method() vs do method()
 	pointer++; // identifier (varName or subroutineName)
@@ -496,13 +496,14 @@ function compileSubroutineCall(tokens, pointer) {
 		code: expressionListCode,
 		pointer: expressionListPointer,
 		count,
-	} = compileExpressionList(tokens, tab + 1, pointer);
+	} = compileExpressionList(tokens, pointer);
 	code += expressionListCode;
 	pointer = expressionListPointer;
 
 	pointer++; // ')'
 	pointer++; // ';'
-	return { code: VMWriter.writeCall(f, count), pointer };
+	code += VMWriter.writeCall(f, count)
+	return { code, pointer };
 }
 
 function resolveVarName(varName) {
