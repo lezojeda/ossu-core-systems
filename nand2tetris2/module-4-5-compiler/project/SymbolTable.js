@@ -27,9 +27,13 @@ const symbolTable = {
 		context.table[name] = { type, kind, index };
 		context.counters[kind]++;
 	},
-	startSubroutine(className) {
+	startSubroutine(className, suboutineType) {
 		const table = symbolTable["subroutine"];
-		this.subroutine.table = { this: { type: className, kind: "argument", index: 0 } };
+
+		if (this.subroutineType === "method") {
+			this.subroutine.table = { this: { type: className, kind: "argument", index: 0 } };
+		}
+
 		table.counters["argument"] = 0;
 		table.counters["local"] = 0;
 	},

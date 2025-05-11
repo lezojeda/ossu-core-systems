@@ -7,29 +7,20 @@ function writePop(segment, index) {
 }
 
 function writeArithmetic(command) {
-	switch (command) {
-		case "+":
-			return "add\n";
-		case "-":
-			return "sub\n";
-		case "*":
-			return "call Math.multiply 2\n";
-		case "/":
-			return "call Math.divide 2\n";
-		case "&":
-			return "and\n";
-		case "|":
-			return "or\n";
-		case "<":
-			return "lt\n";
-		case ">":
-			return "gt\n";
-		case "=":
-			return "eq\n";
-		case "~":
-		case "not":
-			return "neg\n";
-	}
+    switch (command) {
+        case "+": return "add\n";
+        case "-": return "sub\n";
+        case "*": return "call Math.multiply 2\n";
+        case "/": return "call Math.divide 2\n";
+        case "&": return "and\n";
+        case "|": return "or\n";
+        case "<": return "lt\n";
+        case ">": return "gt\n";
+        case "=": return "eq\n";
+        case "~": return "not\n";
+        case "not": return "not\n";
+        case "neg": return "neg\n";
+    }
 }
 
 function writeLabel(label) {
