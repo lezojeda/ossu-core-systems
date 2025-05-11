@@ -1,0 +1,800 @@
+function Ball.new 0
+push argument 0
+pop this 0
+push argument 1
+pop this 1
+push argument 2
+pop this 10
+push argument 3
+push constant 6
+sub
+pop this 11
+push argument 4
+pop this 12
+push argument 5
+push constant 6
+sub
+pop this 13
+push constant 0
+pop this 14
+call Ball.show 0
+<keyword> this </keyword>
+return
+function Ball.dispose 0
+<keyword> this </keyword>
+call Memory.deAlloc 1
+return
+function Ball.show 0
+push constant 1
+neg
+call Screen.setColor 1
+call Ball.draw 0
+return
+function Ball.hide 0
+push constant 0
+call Screen.setColor 1
+call Ball.draw 0
+return
+function Ball.draw 0
+push this 0
+push this 1
+push this 0
+push constant 5
+add
+push this 1
+push constant 5
+add
+call Screen.drawRectangle 4
+return
+function Ball.getLeft 0
+push this 0
+return
+function Ball.getRight 0
+push this 0
+push constant 5
+add
+return
+function Ball.setDestination 3
+push argument 0
+push this 0
+sub
+pop this 2
+push argument 1
+push this 1
+sub
+pop this 3
+push this 2
+call Math.abs 1
+pop local 0
+push this 3
+call Math.abs 1
+pop local 1
+push local 0
+push local 1
+lt
+pop this 7
+push this 7
+not
+if-goto Ball.setDestination.IF_FALSE.288
+push local 0
+pop local 2
+push local 1
+pop local 0
+push local 2
+pop local 1
+push this 1
+push argument 1
+lt
+pop this 8
+push this 0
+push argument 0
+lt
+pop this 9
+goto Ball.setDestination.IF_END.288
+label Ball.setDestination.IF_FALSE.288
+push this 0
+push argument 0
+lt
+pop this 8
+push this 1
+push argument 1
+lt
+pop this 9
+label Ball.setDestination.IF_END.288
+push constant 2
+push local 1
+call Math.multiply 2
+push local 0
+sub
+pop this 4
+push constant 2
+push local 1
+call Math.multiply 2
+pop this 5
+push constant 2
+push local 1
+push local 0
+sub
+call Math.multiply 2
+pop this 6
+return
+function Ball.move 0
+call Ball.hide 0
+push this 4
+push constant 0
+lt
+not
+if-goto Ball.move.IF_FALSE.391
+push this 4
+push this 5
+add
+pop this 4
+goto Ball.move.IF_END.391
+label Ball.move.IF_FALSE.391
+push this 4
+push this 6
+add
+pop this 4
+push this 9
+not
+if-goto Ball.move.IF_FALSE.415
+push this 7
+not
+if-goto Ball.move.IF_FALSE.420
+push this 0
+push constant 4
+add
+pop this 0
+goto Ball.move.IF_END.420
+label Ball.move.IF_FALSE.420
+push this 1
+push constant 4
+add
+pop this 1
+label Ball.move.IF_END.420
+goto Ball.move.IF_END.415
+label Ball.move.IF_FALSE.415
+push this 7
+not
+if-goto Ball.move.IF_FALSE.446
+push this 0
+push constant 4
+sub
+pop this 0
+goto Ball.move.IF_END.446
+label Ball.move.IF_FALSE.446
+push this 1
+push constant 4
+sub
+pop this 1
+label Ball.move.IF_END.446
+label Ball.move.IF_END.415
+label Ball.move.IF_END.391
+push this 8
+not
+if-goto Ball.move.IF_FALSE.471
+push this 7
+not
+if-goto Ball.move.IF_FALSE.476
+push this 1
+push constant 4
+add
+pop this 1
+goto Ball.move.IF_END.476
+label Ball.move.IF_FALSE.476
+push this 0
+push constant 4
+add
+pop this 0
+label Ball.move.IF_END.476
+goto Ball.move.IF_END.471
+label Ball.move.IF_FALSE.471
+push this 7
+not
+if-goto Ball.move.IF_FALSE.502
+push this 1
+push constant 4
+sub
+pop this 1
+goto Ball.move.IF_END.502
+label Ball.move.IF_FALSE.502
+push this 0
+push constant 4
+sub
+pop this 0
+label Ball.move.IF_END.502
+label Ball.move.IF_END.471
+push this 0
+push this 10
+gt
+not
+not
+if-goto Ball.move.IF_FALSE.526
+push constant 1
+pop this 14
+push this 10
+pop this 0
+goto Ball.move.IF_END.526
+label Ball.move.IF_FALSE.526
+label Ball.move.IF_END.526
+push this 0
+push this 11
+lt
+not
+not
+if-goto Ball.move.IF_FALSE.547
+push constant 2
+pop this 14
+push this 11
+pop this 0
+goto Ball.move.IF_END.547
+label Ball.move.IF_FALSE.547
+label Ball.move.IF_END.547
+push this 1
+push this 12
+gt
+not
+not
+if-goto Ball.move.IF_FALSE.568
+push constant 3
+pop this 14
+push this 12
+pop this 1
+goto Ball.move.IF_END.568
+label Ball.move.IF_FALSE.568
+label Ball.move.IF_END.568
+push this 1
+push this 13
+lt
+not
+not
+if-goto Ball.move.IF_FALSE.589
+push constant 4
+pop this 14
+push this 13
+pop this 1
+goto Ball.move.IF_END.589
+label Ball.move.IF_FALSE.589
+label Ball.move.IF_END.589
+call Ball.show 0
+push this 14
+return
+function Ball.bounce 5
+push this 2
+push constant 10
+call Math.divide 2
+pop local 2
+push this 3
+push constant 10
+call Math.divide 2
+pop local 3
+push argument 0
+push constant 0
+eq
+not
+if-goto Ball.bounce.IF_FALSE.653
+push constant 10
+pop local 4
+goto Ball.bounce.IF_END.653
+label Ball.bounce.IF_FALSE.653
+push this 2
+push constant 0
+lt
+not
+push argument 0
+push constant 1
+eq
+and
+push this 2
+push constant 0
+lt
+push argument 0
+push constant 1
+neg
+eq
+and
+or
+not
+if-goto Ball.bounce.IF_FALSE.668
+push constant 20
+pop local 4
+goto Ball.bounce.IF_END.668
+label Ball.bounce.IF_FALSE.668
+push constant 5
+pop local 4
+label Ball.bounce.IF_END.668
+label Ball.bounce.IF_END.653
+push this 14
+push constant 1
+eq
+not
+if-goto Ball.bounce.IF_FALSE.720
+push constant 506
+pop local 0
+push local 3
+push constant 50
+neg
+call Math.multiply 2
+push local 2
+call Math.divide 2
+pop local 1
+push this 1
+push local 1
+push local 4
+call Math.multiply 2
+add
+pop local 1
+goto Ball.bounce.IF_END.720
+label Ball.bounce.IF_FALSE.720
+push this 14
+push constant 2
+eq
+not
+if-goto Ball.bounce.IF_FALSE.760
+push constant 0
+pop local 0
+push local 3
+push constant 50
+call Math.multiply 2
+push local 2
+call Math.divide 2
+pop local 1
+push this 1
+push local 1
+push local 4
+call Math.multiply 2
+add
+pop local 1
+goto Ball.bounce.IF_END.760
+label Ball.bounce.IF_FALSE.760
+push this 14
+push constant 3
+eq
+not
+if-goto Ball.bounce.IF_FALSE.797
+push constant 250
+pop local 1
+push local 2
+push constant 25
+neg
+call Math.multiply 2
+push local 3
+call Math.divide 2
+pop local 0
+push this 0
+push local 0
+push local 4
+call Math.multiply 2
+add
+pop local 0
+goto Ball.bounce.IF_END.797
+label Ball.bounce.IF_FALSE.797
+push constant 0
+pop local 1
+push local 2
+push constant 25
+call Math.multiply 2
+push local 3
+call Math.divide 2
+pop local 0
+push this 0
+push local 0
+push local 4
+call Math.multiply 2
+add
+pop local 0
+label Ball.bounce.IF_END.797
+label Ball.bounce.IF_END.760
+label Ball.bounce.IF_END.720
+push local 0
+push local 1
+call Ball.setDestination 2
+return
+function Bat.new 0
+push argument 0
+pop this 15
+push argument 1
+pop this 16
+push argument 2
+pop this 17
+push argument 3
+pop this 18
+push constant 2
+pop this 19
+call Bat.show 0
+<keyword> this </keyword>
+return
+function Bat.dispose 0
+<keyword> this </keyword>
+call Memory.deAlloc 1
+return
+function Bat.show 0
+push constant 1
+neg
+call Screen.setColor 1
+call Bat.draw 0
+return
+function Bat.hide 0
+push constant 0
+call Screen.setColor 1
+call Bat.draw 0
+return
+function Bat.draw 0
+push this 15
+push this 16
+push this 15
+push this 17
+add
+push this 16
+push this 18
+add
+call Screen.drawRectangle 4
+return
+function Bat.setDirection 0
+push argument 0
+pop this 19
+return
+function Bat.getLeft 0
+push this 15
+return
+function Bat.getRight 0
+push this 15
+push this 17
+add
+return
+function Bat.setWidth 0
+call Bat.hide 0
+push argument 0
+pop this 17
+call Bat.show 0
+return
+function Bat.move 0
+push this 19
+push constant 1
+eq
+not
+if-goto Bat.move.IF_FALSE.228
+push this 15
+push constant 4
+sub
+pop this 15
+push this 15
+push constant 0
+lt
+not
+if-goto Bat.move.IF_FALSE.242
+push constant 0
+pop this 15
+goto Bat.move.IF_END.242
+label Bat.move.IF_FALSE.242
+label Bat.move.IF_END.242
+push constant 0
+call Screen.setColor 1
+push this 15
+push this 17
+add
+push constant 1
+add
+push this 16
+push this 15
+push this 17
+add
+push constant 4
+add
+push this 16
+push this 18
+add
+call Screen.drawRectangle 4
+push constant 1
+neg
+call Screen.setColor 1
+push this 15
+push this 16
+push this 15
+push constant 3
+add
+push this 16
+push this 18
+add
+call Screen.drawRectangle 4
+goto Bat.move.IF_END.228
+label Bat.move.IF_FALSE.228
+push this 15
+push constant 4
+add
+pop this 15
+push this 15
+push this 17
+add
+push constant 511
+gt
+not
+if-goto Bat.move.IF_FALSE.327
+push constant 511
+push this 17
+sub
+pop this 15
+goto Bat.move.IF_END.327
+label Bat.move.IF_FALSE.327
+label Bat.move.IF_END.327
+push constant 0
+call Screen.setColor 1
+push this 15
+push constant 4
+sub
+push this 16
+push this 15
+push constant 1
+sub
+push this 16
+push this 18
+add
+call Screen.drawRectangle 4
+push constant 1
+neg
+call Screen.setColor 1
+push this 15
+push this 17
+add
+push constant 3
+sub
+push this 16
+push this 15
+push this 17
+add
+push this 16
+push this 18
+add
+call Screen.drawRectangle 4
+label Bat.move.IF_END.228
+return
+function Main.main 1
+call PongGame.newInstance 0
+call PongGame.getInstance 0
+pop local 0
+call game.run 0
+call game.dispose 0
+return
+function PongGame.new 0
+call Screen.clearScreen 0
+push constant 50
+pop this 26
+push constant 230
+push constant 229
+push this 26
+push constant 7
+push constant 24
+call Memory.alloc 1
+pop pointer 0
+call Bat.new 4
+pop this 20
+push constant 253
+push constant 222
+push constant 0
+push constant 511
+push constant 0
+push constant 229
+push constant 24
+call Memory.alloc 1
+pop pointer 0
+call Ball.new 6
+pop this 21
+push constant 400
+push constant 0
+call ball.setDestination 2
+push constant 0
+push constant 238
+push constant 511
+push constant 240
+call Screen.drawRectangle 4
+push constant 22
+push constant 0
+call Output.moveCursor 2
+<stringConstant> Score: 0 </stringConstant>
+call Output.printString 1
+push constant 0
+pop this 23
+push constant 0
+pop this 24
+push constant 0
+pop this 22
+push constant 0
+pop this 25
+<keyword> this </keyword>
+return
+function PongGame.dispose 0
+call bat.dispose 0
+call ball.dispose 0
+<keyword> this </keyword>
+call Memory.deAlloc 1
+return
+function PongGame.newInstance 0
+push constant 24
+call Memory.alloc 1
+pop pointer 0
+call PongGame.new 0
+pop static 0
+return
+function PongGame.getInstance 0
+push static 0
+return
+function PongGame.run 1
+label PongGame.run.WHILE.224
+push this 23
+not
+not
+if-goto PongGame.run.EXIT_WHILE.224
+label PongGame.run.WHILE.230
+push local 0
+push constant 0
+eq
+push this 23
+not
+and
+not
+if-goto PongGame.run.EXIT_WHILE.230
+call Keyboard.keyPressed 0
+pop local 0
+call bat.move 0
+call PongGame.moveBall 0
+push constant 50
+call Sys.wait 1
+goto PongGame.run.WHILE.230
+label PongGame.run.EXIT_WHILE.230
+push local 0
+push constant 130
+eq
+not
+if-goto PongGame.run.IF_FALSE.274
+push constant 1
+call bat.setDirection 1
+goto PongGame.run.IF_END.274
+label PongGame.run.IF_FALSE.274
+push local 0
+push constant 132
+eq
+not
+if-goto PongGame.run.IF_FALSE.292
+push constant 2
+call bat.setDirection 1
+goto PongGame.run.IF_END.292
+label PongGame.run.IF_FALSE.292
+push local 0
+push constant 140
+eq
+not
+if-goto PongGame.run.IF_FALSE.310
+push constant 1
+neg
+pop this 23
+goto PongGame.run.IF_END.310
+label PongGame.run.IF_FALSE.310
+label PongGame.run.IF_END.310
+label PongGame.run.IF_END.292
+label PongGame.run.IF_END.274
+label PongGame.run.WHILE.325
+push local 0
+push constant 0
+eq
+not
+push this 23
+not
+and
+not
+if-goto PongGame.run.EXIT_WHILE.325
+call Keyboard.keyPressed 0
+pop local 0
+call bat.move 0
+call PongGame.moveBall 0
+push constant 50
+call Sys.wait 1
+goto PongGame.run.WHILE.325
+label PongGame.run.EXIT_WHILE.325
+goto PongGame.run.WHILE.224
+label PongGame.run.EXIT_WHILE.224
+push this 23
+not
+if-goto PongGame.run.IF_FALSE.373
+push constant 10
+push constant 27
+call Output.moveCursor 2
+<stringConstant> Game Over </stringConstant>
+call Output.printString 1
+goto PongGame.run.IF_END.373
+label PongGame.run.IF_FALSE.373
+label PongGame.run.IF_END.373
+return
+function PongGame.moveBall 5
+call ball.move 0
+pop this 22
+push this 22
+push constant 0
+gt
+push this 22
+push this 25
+eq
+not
+and
+not
+if-goto PongGame.moveBall.IF_FALSE.427
+push this 22
+pop this 25
+push constant 0
+pop local 0
+call bat.getLeft 0
+pop local 1
+call bat.getRight 0
+pop local 2
+call ball.getLeft 0
+pop local 3
+call ball.getRight 0
+pop local 4
+push this 22
+push constant 4
+eq
+not
+if-goto PongGame.moveBall.IF_FALSE.491
+push local 1
+push local 4
+gt
+push local 2
+push local 3
+lt
+or
+pop this 23
+push this 23
+not
+not
+if-goto PongGame.moveBall.IF_FALSE.513
+push local 4
+push local 1
+push constant 10
+add
+lt
+not
+if-goto PongGame.moveBall.IF_FALSE.519
+push constant 1
+neg
+pop local 0
+goto PongGame.moveBall.IF_END.519
+label PongGame.moveBall.IF_FALSE.519
+push local 3
+push local 2
+push constant 10
+sub
+gt
+not
+if-goto PongGame.moveBall.IF_FALSE.539
+push constant 1
+pop local 0
+goto PongGame.moveBall.IF_END.539
+label PongGame.moveBall.IF_FALSE.539
+label PongGame.moveBall.IF_END.539
+label PongGame.moveBall.IF_END.519
+push this 26
+push constant 2
+sub
+pop this 26
+push this 26
+call bat.setWidth 1
+push this 24
+push constant 1
+add
+pop this 24
+push constant 22
+push constant 7
+call Output.moveCursor 2
+push this 24
+call Output.printInt 1
+goto PongGame.moveBall.IF_END.513
+label PongGame.moveBall.IF_FALSE.513
+label PongGame.moveBall.IF_END.513
+goto PongGame.moveBall.IF_END.491
+label PongGame.moveBall.IF_FALSE.491
+label PongGame.moveBall.IF_END.491
+push local 0
+call ball.bounce 1
+goto PongGame.moveBall.IF_END.427
+label PongGame.moveBall.IF_FALSE.427
+label PongGame.moveBall.IF_END.427
+return

@@ -3,7 +3,7 @@ const symbolTable = require("./SymbolTable");
 const VMWriter = require("./VMWriter");
 const context = require("./context");
 
-function parseToXML(tokens, pointer = 0) {
+function compile(tokens, pointer = 0) {
 	const { code } = compileClass(tokens, pointer);
 	return code;
 }
@@ -480,32 +480,64 @@ function compileExpressionList(tokens, pointer, context) {
 }
 
 function compileSubroutineCall(tokens, pointer, context) {
-	let code = "";
-	const identifier = tokens[pointer].value;
-	f = `${context.className}.${identifier}`; // TODO: fix this duplicate reassignment to subroutineName in the two possible cases of do class.method() vs do method()
-	pointer++; // identifier (varName or subroutineName)
+    let code = "";
+    const identifier = tokens[pointer].value; // ClassName or varName
+    let f = `${context.className}.${identifier}`;
+    pointer++;
+    let isNew = false;
+    let className = identifier;
 
-	if (tokens[pointer].value === ".") {
-		pointer++; // '.'
+    // Check for explicit subroutine call (e.g., ClassName.method or varName.method)
+    if (tokens[pointer].value === ".") {
+        pointer++; // '.'
 
-		f = `${identifier}.${tokens[pointer].value}`;
-		pointer++; // subroutine name
-	}
+        const subroutineName = tokens[pointer].value;
+        if (subroutineName === "new") {
+            isNew = true;
+            // Resolve class name if identifier is a variable
+            if (symbolTable.subroutine.table[identifier] || symbolTable.class.table[identifier]) {
+                const varEntry = symbolTable.subroutine.table[identifier] || symbolTable.class.table[identifier];
+                className = varEntry.type;
+            }
+        } else {
+            f = `${identifier}.${subroutineName}`;
+        }
 
-	pointer++; // '('
+        pointer++; // subroutine name
+    }
 
-	// Expression list
-	const {
-		code: expressionListCode,
-		pointer: expressionListPointer,
-		count,
-	} = compileExpressionList(tokens, pointer, context);
-	code += expressionListCode;
-	pointer = expressionListPointer;
+    pointer++; // '('
 
-	pointer++; // ')'
-	code += VMWriter.writeCall(f, count);
-	return { code, pointer };
+    // Compile expression list (arguments)
+    const { code: expressionListCode, pointer: expressionListPointer, count } = compileExpressionList(tokens, pointer, context);
+    code += expressionListCode;
+    pointer = expressionListPointer;
+    pointer++; // Skip ')'
+
+    // Handle 'new' vs. regular subroutine call
+    if (isNew) {
+        const newResult = compileNew(className, count, context);
+        code += newResult.code;
+    } else {
+        code += VMWriter.writeCall(f, count);
+    }
+
+    return { code, pointer };
+}
+
+function compileNew(className, argCount, context) {
+    let code = "";
+    // Get number of fields for the class (assumes symbolTable tracks fieldCount per class)
+    const fieldCount = symbolTable.getFieldCount(className) || 0;
+
+    // Allocate memory
+    code += VMWriter.writePush("constant", fieldCount);
+    code += VMWriter.writeCall("Memory.alloc", 1);
+    code += VMWriter.writePop("pointer", 0);
+
+    // Call constructor
+    code += VMWriter.writeCall(`${className}.new`, argCount);
+    return { code };
 }
 
 function resolveVarName(varName) {
@@ -518,4 +550,4 @@ function resolveVarName(varName) {
 	return { segment: entry.kind === "field" ? "this" : entry.kind, ...entry };
 }
 
-module.exports = { parseToXML };
+module.exports = { compile };

@@ -37,6 +37,11 @@ const symbolTable = {
 		table.counters["argument"] = 0;
 		table.counters["local"] = 0;
 	},
+	getFieldCount(className) {
+		return Object.values(this.class.table).filter(
+			entry => entry.kind === "field"
+		).length;
+	}
 };
 
 module.exports = symbolTable;
