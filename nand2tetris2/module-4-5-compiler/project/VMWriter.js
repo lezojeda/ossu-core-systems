@@ -26,8 +26,9 @@ function writeArithmetic(command) {
 			return "gt\n";
 		case "=":
 			return "eq\n";
+		case "~":
 		case "not":
-			return "not\n";
+			return "neg\n";
 	}
 }
 
