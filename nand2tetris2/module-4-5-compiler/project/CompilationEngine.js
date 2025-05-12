@@ -19,13 +19,13 @@ function compileClass(tokens, pointer) {
 	pointer++; // class name
 	pointer++; // '{'
 
-	while (["static", "field"].includes(tokens[pointer]?.value)) {
+	while (["static", "field"].includes(tokens[pointer].value)) {
 		const classVarDecResult = compileClassVarDec(tokens, pointer);
 		code += classVarDecResult.code;
 		pointer = classVarDecResult.pointer;
 	}
 
-	while (["constructor", "function", "method"].includes(tokens[pointer]?.value)) {
+	while (["constructor", "function", "method"].includes(tokens[pointer].value)) {
 		const subroutineResult = compileSubroutine(tokens, pointer, context);
 		code += subroutineResult.code;
 		pointer = subroutineResult.pointer;
@@ -37,37 +37,43 @@ function compileClass(tokens, pointer) {
 }
 
 function compileSubroutine(tokens, pointer, context) {
-    const { className } = context;
-	context['suboutineType'] = tokens[pointer].value;
-    symbolTable.startSubroutine(className, context.subroutineType);
+	let code = "";
 
-    let code = "";
+	const { className } = context;
+	const subroutineType = tokens[pointer].value;
+	context["subroutineType"] = subroutineType;
+	symbolTable.startSubroutine(className, subroutineType);
 
-    pointer++; // 'function'
-    pointer++; // function return type
-    const subroutineName = tokens[pointer].value;
-    context["subroutineName"] = subroutineName;
-    pointer++; // function name
+	pointer++; // 'function', 'method' or 'constructor'
+	pointer++; // function return type
 
-    pointer++; // '('
+	const subroutineName = tokens[pointer].value;
+	context["subroutineName"] = subroutineName;
+	pointer++; // function name
 
-    // Parameter list
-    const parameterListResult = compileParameterList(tokens, pointer, context);
-    pointer = parameterListResult.pointer;
+	pointer++; // '('
 
-    pointer++; // ')'
+	// Parameter list
+	const parameterListResult = compileParameterList(tokens, pointer, context);
+	pointer = parameterListResult.pointer;
 
-    const body = compileSubroutineBody(tokens, pointer, context);
-    
-    code += VMWriter.writeFunction(
-        `${context.className}.${context.subroutineName}`,
-        body.nLocals
-    );
-    
-    code += body.code;
-    pointer = body.pointer;
+	pointer++; // ')'
 
-    return { code, pointer };
+	const body = compileSubroutineBody(tokens, pointer, context);
+
+	code += VMWriter.writeFunction(`${context.className}.${context.subroutineName}`, body.nLocals);
+
+	if (subroutineType === "constructor") {
+		const nFields = symbolTable.getFieldCount(context.className);
+		code += VMWriter.writePush("constant", nFields);
+		code += VMWriter.writeCall("Memory.alloc", 1);
+		code += VMWriter.writePop("pointer", 0);
+	}
+
+	code += body.code;
+	pointer = body.pointer;
+
+	return { code, pointer };
 }
 
 function compileTerminalToken(token) {
@@ -111,29 +117,29 @@ function compileParameterList(tokens, pointer, context) {
 }
 
 function compileSubroutineBody(tokens, pointer, context) {
-    let code = "";
-    let nLocals = 0;
-    let varDecCode = "";
+	let code = "";
+	let nLocals = 0;
+	let varDecCode = "";
 
-    pointer++; // {
+	pointer++; // {
 
-    while (tokens[pointer].value === "var") {
-        // var declarations
-        const result = compileVarDec(tokens, pointer);
-        varDecCode += result.code;
-        nLocals += result.varCount;
-        pointer = result.pointer;
-    }
+	while (tokens[pointer].value === "var") {
+		// var declarations
+		const result = compileVarDec(tokens, pointer);
+		varDecCode += result.code;
+		nLocals += result.varCount;
+		pointer = result.pointer;
+	}
 
-    code += varDecCode;
+	code += varDecCode;
 
-    const statementsResult = compileStatements(tokens, pointer, context); // statements
-    code += statementsResult.code;
-    pointer = statementsResult.pointer;
+	const statementsResult = compileStatements(tokens, pointer, context); // statements
+	code += statementsResult.code;
+	pointer = statementsResult.pointer;
 
-    pointer++; // }
+	pointer++; // }
 
-    return { code, pointer, nLocals }; // Return nLocals with the result
+	return { code, pointer, nLocals }; // Return nLocals with the result
 }
 
 function compileClassVarDec(tokens, pointer) {
@@ -163,29 +169,29 @@ function compileClassVarDec(tokens, pointer) {
 }
 
 function compileVarDec(tokens, pointer) {
-    let code = "";
-    let varCount = 0;
+	let code = "";
+	let varCount = 0;
 
-    // Parse kind and type
-    pointer++; // 'var'
+	// Parse kind and type
+	pointer++; // 'var'
 
-    const type = tokens[pointer].value;
-    pointer++; // type
+	const type = tokens[pointer].value;
+	pointer++; // type
 
-    while (tokens[pointer].value !== ";") {
-        varCount++; // Increment var count
-        const name = tokens[pointer].value;
+	while (tokens[pointer].value !== ";") {
+		varCount++; // Increment var count
+		const name = tokens[pointer].value;
 
-        pointer++; // varName
-        symbolTable.defineSubroutineSymbol(name, type, "local");
+		pointer++; // varName
+		symbolTable.defineSubroutineSymbol(name, type, "var");
 
-        if (tokens[pointer].value === ",") {
-            pointer++; // ','
-        }
-    }
+		if (tokens[pointer].value === ",") {
+			pointer++; // ','
+		}
+	}
 
-    pointer++; // ;
-    return { code, pointer, varCount };
+	pointer++; // ;
+	return { code, pointer, varCount };
 }
 
 function compileStatements(tokens, pointer, context) {
@@ -249,7 +255,7 @@ function compileLet(tokens, pointer, context) {
 	// resolve varname to write pop at the end
 	const varName = tokens[pointer].value;
 
-	const { segment, index } = resolveVarName(varName);
+	const { index } = resolveVarName(varName);
 
 	pointer++; // varName
 
@@ -271,7 +277,7 @@ function compileLet(tokens, pointer, context) {
 	pointer = expressionResult.pointer;
 
 	pointer++; // ';'
-	code += VMWriter.writePop(segment, index);
+	code += VMWriter.writePop(resolveSegment(varName), index);
 
 	return { code, pointer };
 }
@@ -400,58 +406,64 @@ function compileExpression(tokens, pointer, context) {
 }
 
 function compileTerm(tokens, pointer, context) {
-    let code = "";
-    const nextToken = tokens[pointer + 1] || {};
+	let code = "";
+	const nextToken = tokens[pointer + 1] || {};
 
-    if (tokens[pointer].tokenType === "INT_CONST") {
-        code += VMWriter.writePush("constant", tokens[pointer++].value);
-    }
-    else if (tokens[pointer].tokenType === "STRING_CONST" || ["this"].includes(tokens[pointer].value)) {
-        code += compileTerminalToken(tokens[pointer++]);
-    }
-    else if (tokens[pointer].value === "true") {
-        code += VMWriter.writePush("constant", 1);
-        code += VMWriter.writeArithmetic("neg");
-        pointer++;
-    }
-    else if (["false", "null"].includes(tokens[pointer].value)) {
-        code += VMWriter.writePush("constant", 0);
-        pointer++;
-    }
-    else if (["-", "~"].includes(tokens[pointer].value)) {
-        const op = tokens[pointer].value === "-" ? "neg" : "not";
-        pointer++;
-        const termResult = compileTerm(tokens, pointer, context);
-        code += termResult.code; // Compile term first (e.g., push constant 1)
-        code += VMWriter.writeArithmetic(op); // Apply neg or not after
-        pointer = termResult.pointer;
-    }
-    else if (tokens[pointer].value === "(") {
-        pointer++;
-        const expressionResult = compileExpression(tokens, pointer, context);
-        code += expressionResult.code;
-        pointer = expressionResult.pointer;
-        pointer++;
-    }
-    else if (nextToken.value === "[") {
-        code += compileTerminalToken(tokens[pointer++]);
-        code += compileTerminalToken(tokens[pointer++]);
-        const expressionResult = compileExpression(tokens, pointer, context);
-        code += expressionResult.code;
-        pointer = expressionResult.pointer;
-        code += compileTerminalToken(tokens[pointer++]);
-    }
-    else if (nextToken.value === "." || nextToken.value === "(") {
-        const subroutineCallResult = compileSubroutineCall(tokens, pointer, context);
-        code += subroutineCallResult.code;
-        pointer = subroutineCallResult.pointer;
-    }
-    else {
-        const varName = tokens[pointer++].value;
-        const { segment, index } = resolveVarName(varName);
-        code += VMWriter.writePush(segment === "field" ? "this" : segment, index);
-    }
-    return { code, pointer };
+	if (tokens[pointer].tokenType === "INT_CONST") {
+		code += VMWriter.writePush("constant", tokens[pointer++].value);
+	} else if (tokens[pointer].tokenType === "STRING_CONST") {
+		const stringValue = tokens[pointer].value;
+		const stringLength = stringValue.length;
+
+		code += VMWriter.writeCall("String.new", 1);
+		code += VMWriter.writePush("constant", stringLength);
+
+		for (let i = 0; i < stringLength; i++) {
+			code += VMWriter.writePush("constant", stringValue.charCodeAt(i));
+			code += VMWriter.writeCall("String.appendChar", 1);
+		}
+
+		pointer++;
+	} else if (tokens[pointer].value === "this") {
+		code += VMWriter.writePush("pointer", 0);
+		pointer++;
+	} else if (tokens[pointer].value === "true") {
+		code += VMWriter.writePush("constant", 1);
+		code += VMWriter.writeArithmetic("neg");
+		pointer++;
+	} else if (["false", "null"].includes(tokens[pointer].value)) {
+		code += VMWriter.writePush("constant", 0);
+		pointer++;
+	} else if (["-", "~"].includes(tokens[pointer].value)) {
+		const op = tokens[pointer].value === "-" ? "neg" : "not";
+		pointer++;
+		const termResult = compileTerm(tokens, pointer, context);
+		code += termResult.code; // Compile term first (e.g., push constant 1)
+		code += VMWriter.writeArithmetic(op); // Apply neg or not after
+		pointer = termResult.pointer;
+	} else if (tokens[pointer].value === "(") {
+		pointer++;
+		const expressionResult = compileExpression(tokens, pointer, context);
+		code += expressionResult.code;
+		pointer = expressionResult.pointer;
+		pointer++;
+	} else if (nextToken.value === "[") {
+		code += compileTerminalToken(tokens[pointer++]);
+		code += compileTerminalToken(tokens[pointer++]);
+		const expressionResult = compileExpression(tokens, pointer, context);
+		code += expressionResult.code;
+		pointer = expressionResult.pointer;
+		code += compileTerminalToken(tokens[pointer++]);
+	} else if (nextToken.value === "." || nextToken.value === "(") {
+		const subroutineCallResult = compileSubroutineCall(tokens, pointer, context);
+		code += subroutineCallResult.code;
+		pointer = subroutineCallResult.pointer;
+	} else {
+		const varName = tokens[pointer++].value;
+		const { segment, index } = resolveVarName(varName);
+		code += VMWriter.writePush(segment === "field" ? "this" : segment, index);
+	}
+	return { code, pointer };
 }
 
 function compileExpressionList(tokens, pointer, context) {
@@ -480,64 +492,73 @@ function compileExpressionList(tokens, pointer, context) {
 }
 
 function compileSubroutineCall(tokens, pointer, context) {
-    let code = "";
-    const identifier = tokens[pointer].value; // ClassName or varName
-    let f = `${context.className}.${identifier}`;
-    pointer++;
-    let isNew = false;
-    let className = identifier;
+	let code = "";
+	const identifier = tokens[pointer].value; // ClassName or varName
+	let f = `${context.className}.${identifier}`;
+	pointer++;
 
-    // Check for explicit subroutine call (e.g., ClassName.method or varName.method)
-    if (tokens[pointer].value === ".") {
-        pointer++; // '.'
+	let objectBase = null;
+	let className = null;
+	let subroutineName = null;
+	let isMethod = false;
 
-        const subroutineName = tokens[pointer].value;
-        if (subroutineName === "new") {
-            isNew = true;
-            // Resolve class name if identifier is a variable
-            if (symbolTable.subroutine.table[identifier] || symbolTable.class.table[identifier]) {
-                const varEntry = symbolTable.subroutine.table[identifier] || symbolTable.class.table[identifier];
-                className = varEntry.type;
-            }
-        } else {
-            f = `${identifier}.${subroutineName}`;
-        }
+	// Check for explicit subroutine call (e.g., varName.method() or ClassName.function())
+	if (tokens[pointer].value === ".") {
+		pointer++; // skip '.'
+		subroutineName = tokens[pointer].value;
+		pointer++; // skip subroutineName
 
-        pointer++; // subroutine name
-    }
+		const varEntry =
+			symbolTable.subroutine.table[identifier] || symbolTable.class.table[identifier];
 
-    pointer++; // '('
+		if (varEntry) {
+			// varName.method() -- it's a method call on an object
+			isMethod = true;
+			className = varEntry.type;
+			f = `${className}.${subroutineName}`;
+			objectBase = identifier;
+		} else {
+			// ClassName.new() or ClassName.function()
+			className = identifier;
+			f = `${className}.${subroutineName}`;
+		}
+	} else {
+		// Implicit method call within current class
+		subroutineName = identifier;
+		f = `${context.className}.${subroutineName}`;
+		isMethod = true;
+		objectBase = "this";
+	}
 
-    // Compile expression list (arguments)
-    const { code: expressionListCode, pointer: expressionListPointer, count } = compileExpressionList(tokens, pointer, context);
-    code += expressionListCode;
-    pointer = expressionListPointer;
-    pointer++; // Skip ')'
+	pointer++; // skip '('
 
-    // Handle 'new' vs. regular subroutine call
-    if (isNew) {
-        const newResult = compileNew(className, count, context);
-        code += newResult.code;
-    } else {
-        code += VMWriter.writeCall(f, count);
-    }
+	// Compile expression list
+	const {
+		code: expressionListCode,
+		pointer: newPointer,
+		count,
+	} = compileExpressionList(tokens, pointer, context);
+	pointer = newPointer;
+	pointer++; // skip ')'
+	code += expressionListCode;
 
-    return { code, pointer };
-}
+	let argCount = count;
 
-function compileNew(className, argCount, context) {
-    let code = "";
-    // Get number of fields for the class (assumes symbolTable tracks fieldCount per class)
-    const fieldCount = symbolTable.getFieldCount(className) || 0;
+	// If it's a method, push the object (including 'this') as the first argument
+	if (isMethod) {
+		if (objectBase === "this") {
+			code = VMWriter.writePush("pointer", 0) + code;
+		} else {
+			const segment = resolveSegment(objectBase);
+			const index = resolveIndex(objectBase);
+			code = VMWriter.writePush(segment, index) + code;
+		}
+		argCount += 1;
+	}
 
-    // Allocate memory
-    code += VMWriter.writePush("constant", fieldCount);
-    code += VMWriter.writeCall("Memory.alloc", 1);
-    code += VMWriter.writePop("pointer", 0);
+	code += VMWriter.writeCall(f, argCount);
 
-    // Call constructor
-    code += VMWriter.writeCall(`${className}.new`, argCount);
-    return { code };
+	return { code, pointer };
 }
 
 function resolveVarName(varName) {
@@ -548,6 +569,44 @@ function resolveVarName(varName) {
 	}
 
 	return { segment: entry.kind === "field" ? "this" : entry.kind, ...entry };
+}
+
+function resolveSegment(name) {
+	const sub = symbolTable.subroutine.table[name];
+	if (sub) {
+		switch (sub.kind) {
+			case "var":
+				return "local";
+			case "argument":
+				return "argument";
+			default:
+				throw new Error(`Unknown subroutine variable kind: ${sub.kind}`);
+		}
+	}
+
+	const cls = symbolTable.class.table[name];
+	if (cls) {
+		switch (cls.kind) {
+			case "field":
+				return "this";
+			case "static":
+				return "static";
+			default:
+				throw new Error(`Unknown class variable kind: ${cls.kind}`);
+		}
+	}
+
+	throw new Error(`Variable '${name}' not found in symbol tables`);
+}
+
+function resolveIndex(name) {
+	const sub = symbolTable.subroutine.table[name];
+	if (sub) return sub.index;
+
+	const cls = symbolTable.class.table[name];
+	if (cls) return cls.index;
+
+	throw new Error(`Variable '${name}' not found in symbol tables`);
 }
 
 module.exports = { compile };

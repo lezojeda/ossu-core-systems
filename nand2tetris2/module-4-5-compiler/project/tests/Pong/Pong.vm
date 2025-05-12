@@ -18,10 +18,10 @@ pop this 13
 push constant 0
 pop this 14
 call Ball.show 0
-<keyword> this </keyword>
+push pointer 0
 return
 function Ball.dispose 0
-<keyword> this </keyword>
+push pointer 0
 call Memory.deAlloc 1
 return
 function Ball.show 0
@@ -402,10 +402,10 @@ pop this 18
 push constant 2
 pop this 19
 call Bat.show 0
-<keyword> this </keyword>
+push pointer 0
 return
 function Bat.dispose 0
-<keyword> this </keyword>
+push pointer 0
 call Memory.deAlloc 1
 return
 function Bat.show 0
@@ -590,7 +590,24 @@ call Screen.drawRectangle 4
 push constant 22
 push constant 0
 call Output.moveCursor 2
-<stringConstant> Score: 0 </stringConstant>
+call String.new 1
+push constant 8
+push constant 83
+call String.appendChar 1
+push constant 99
+call String.appendChar 1
+push constant 111
+call String.appendChar 1
+push constant 114
+call String.appendChar 1
+push constant 101
+call String.appendChar 1
+push constant 58
+call String.appendChar 1
+push constant 32
+call String.appendChar 1
+push constant 48
+call String.appendChar 1
 call Output.printString 1
 push constant 0
 pop this 23
@@ -600,12 +617,12 @@ push constant 0
 pop this 22
 push constant 0
 pop this 25
-<keyword> this </keyword>
+push pointer 0
 return
 function PongGame.dispose 0
 call bat.dispose 0
 call ball.dispose 0
-<keyword> this </keyword>
+push pointer 0
 call Memory.deAlloc 1
 return
 function PongGame.newInstance 0
@@ -698,7 +715,26 @@ if-goto PongGame.run.IF_FALSE.373
 push constant 10
 push constant 27
 call Output.moveCursor 2
-<stringConstant> Game Over </stringConstant>
+call String.new 1
+push constant 9
+push constant 71
+call String.appendChar 1
+push constant 97
+call String.appendChar 1
+push constant 109
+call String.appendChar 1
+push constant 101
+call String.appendChar 1
+push constant 32
+call String.appendChar 1
+push constant 79
+call String.appendChar 1
+push constant 118
+call String.appendChar 1
+push constant 101
+call String.appendChar 1
+push constant 114
+call String.appendChar 1
 call Output.printString 1
 goto PongGame.run.IF_END.373
 label PongGame.run.IF_FALSE.373

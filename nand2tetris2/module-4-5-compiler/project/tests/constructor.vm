@@ -1,0 +1,12 @@
+function Main.main 1
+push constant 10
+push constant 20
+call Point.new 2
+pop var 0
+push local 0
+call Point.getX 1
+call Output.printInt 1
+push local 0
+call Point.getY 1
+call Output.printInt 1
+return

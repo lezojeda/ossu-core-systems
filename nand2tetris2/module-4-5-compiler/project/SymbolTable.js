@@ -11,7 +11,7 @@ const symbolTable = {
 	},
 	subroutine: {
 		table: {},
-		counters: { argument: 0, local: 0 },
+		counters: { argument: 0, var: 0 },
 	},
 	defineClassSymbol(name, type, kind) {
 		const context = symbolTable["class"];
@@ -27,7 +27,7 @@ const symbolTable = {
 		context.table[name] = { type, kind, index };
 		context.counters[kind]++;
 	},
-	startSubroutine(className, suboutineType) {
+	startSubroutine(className, subroutineType) {
 		const table = symbolTable["subroutine"];
 
 		if (this.subroutineType === "method") {
@@ -35,7 +35,7 @@ const symbolTable = {
 		}
 
 		table.counters["argument"] = 0;
-		table.counters["local"] = 0;
+		table.counters["var"] = 0;
 	},
 	getFieldCount(className) {
 		return Object.values(this.class.table).filter(
