@@ -68,6 +68,9 @@ function compileSubroutine(tokens, pointer, context) {
 		code += VMWriter.writePush("constant", nFields);
 		code += VMWriter.writeCall("Memory.alloc", 1);
 		code += VMWriter.writePop("pointer", 0);
+	} else if (subroutineType === "method") {
+		code += VMWriter.writePush("argument", 0);
+		code += VMWriter.writePop("pointer", 0);
 	}
 
 	code += body.code;

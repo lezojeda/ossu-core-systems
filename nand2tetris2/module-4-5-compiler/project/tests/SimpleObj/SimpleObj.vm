@@ -25,8 +25,12 @@ pop static 0
 push pointer 0
 return
 function Point.getX 0
+push argument 0
+pop pointer 0
 push this 0
 return
 function Point.getY 0
+push argument 0
+pop pointer 0
 push this 1
 return

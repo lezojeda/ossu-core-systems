@@ -9,7 +9,7 @@ class Point {
         return this;
     }
 
-    method int getX() {
+    method int getX(int a, int b, int c) {
         return x;
     }
 
