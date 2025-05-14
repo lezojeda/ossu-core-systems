@@ -1,4 +1,7 @@
 function Ball.new 0
+push constant 15
+call Memory.alloc 1
+pop pointer 0
 push argument 0
 pop this 0
 push argument 1
@@ -17,25 +20,42 @@ sub
 pop this 13
 push constant 0
 pop this 14
-call Ball.show 0
+push pointer 0
+call Ball.show 1
+pop temp 0
 push pointer 0
 return
 function Ball.dispose 0
+push argument 0
+pop pointer 0
 push pointer 0
 call Memory.deAlloc 1
+pop temp 0
 return
 function Ball.show 0
+push argument 0
+pop pointer 0
 push constant 1
 neg
 call Screen.setColor 1
-call Ball.draw 0
+pop temp 0
+push pointer 0
+call Ball.draw 1
+pop temp 0
 return
 function Ball.hide 0
+push argument 0
+pop pointer 0
 push constant 0
 call Screen.setColor 1
-call Ball.draw 0
+pop temp 0
+push pointer 0
+call Ball.draw 1
+pop temp 0
 return
 function Ball.draw 0
+push argument 0
+pop pointer 0
 push this 0
 push this 1
 push this 0
@@ -45,21 +65,28 @@ push this 1
 push constant 5
 add
 call Screen.drawRectangle 4
+pop temp 0
 return
 function Ball.getLeft 0
+push argument 0
+pop pointer 0
 push this 0
 return
 function Ball.getRight 0
+push argument 0
+pop pointer 0
 push this 0
 push constant 5
 add
 return
 function Ball.setDestination 3
 push argument 0
+pop pointer 0
+push argument 1
 push this 0
 sub
 pop this 2
-push argument 1
+push argument 2
 push this 1
 sub
 pop this 3
@@ -83,21 +110,21 @@ pop local 0
 push local 2
 pop local 1
 push this 1
-push argument 1
+push argument 2
 lt
 pop this 8
 push this 0
-push argument 0
+push argument 1
 lt
 pop this 9
 goto Ball.setDestination.IF_END.288
 label Ball.setDestination.IF_FALSE.288
 push this 0
-push argument 0
+push argument 1
 lt
 pop this 8
 push this 1
-push argument 1
+push argument 2
 lt
 pop this 9
 label Ball.setDestination.IF_END.288
@@ -119,7 +146,11 @@ call Math.multiply 2
 pop this 6
 return
 function Ball.move 0
-call Ball.hide 0
+push argument 0
+pop pointer 0
+push pointer 0
+call Ball.hide 1
+pop temp 0
 push this 4
 push constant 0
 lt
@@ -256,10 +287,14 @@ pop this 1
 goto Ball.move.IF_END.589
 label Ball.move.IF_FALSE.589
 label Ball.move.IF_END.589
-call Ball.show 0
+push pointer 0
+call Ball.show 1
+pop temp 0
 push this 14
 return
 function Ball.bounce 5
+push argument 0
+pop pointer 0
 push this 2
 push constant 10
 call Math.divide 2
@@ -268,7 +303,7 @@ push this 3
 push constant 10
 call Math.divide 2
 pop local 3
-push argument 0
+push argument 1
 push constant 0
 eq
 not
@@ -281,14 +316,14 @@ push this 2
 push constant 0
 lt
 not
-push argument 0
+push argument 1
 push constant 1
 eq
 and
 push this 2
 push constant 0
 lt
-push argument 0
+push argument 1
 push constant 1
 neg
 eq
@@ -386,249 +421,306 @@ pop local 0
 label Ball.bounce.IF_END.797
 label Ball.bounce.IF_END.760
 label Ball.bounce.IF_END.720
+push pointer 0
 push local 0
 push local 1
-call Ball.setDestination 2
+call Ball.setDestination 3
+pop temp 0
 return
 function Bat.new 0
+push constant 5
+call Memory.alloc 1
+pop pointer 0
 push argument 0
-pop this 15
+pop this 0
 push argument 1
-pop this 16
+pop this 1
 push argument 2
-pop this 17
+pop this 2
 push argument 3
-pop this 18
+pop this 3
 push constant 2
-pop this 19
-call Bat.show 0
+pop this 4
+push pointer 0
+call Bat.show 1
+pop temp 0
 push pointer 0
 return
 function Bat.dispose 0
+push argument 0
+pop pointer 0
 push pointer 0
 call Memory.deAlloc 1
+pop temp 0
 return
 function Bat.show 0
+push argument 0
+pop pointer 0
 push constant 1
 neg
 call Screen.setColor 1
-call Bat.draw 0
+pop temp 0
+push pointer 0
+call Bat.draw 1
+pop temp 0
 return
 function Bat.hide 0
+push argument 0
+pop pointer 0
 push constant 0
 call Screen.setColor 1
-call Bat.draw 0
+pop temp 0
+push pointer 0
+call Bat.draw 1
+pop temp 0
 return
 function Bat.draw 0
-push this 15
-push this 16
-push this 15
-push this 17
+push argument 0
+pop pointer 0
+push this 0
+push this 1
+push this 0
+push this 2
 add
-push this 16
-push this 18
+push this 1
+push this 3
 add
 call Screen.drawRectangle 4
+pop temp 0
 return
 function Bat.setDirection 0
 push argument 0
-pop this 19
+pop pointer 0
+push argument 1
+pop this 4
 return
 function Bat.getLeft 0
-push this 15
+push argument 0
+pop pointer 0
+push this 0
 return
 function Bat.getRight 0
-push this 15
-push this 17
+push argument 0
+pop pointer 0
+push this 0
+push this 2
 add
 return
 function Bat.setWidth 0
-call Bat.hide 0
 push argument 0
-pop this 17
-call Bat.show 0
+pop pointer 0
+push pointer 0
+call Bat.hide 1
+pop temp 0
+push argument 1
+pop this 2
+push pointer 0
+call Bat.show 1
+pop temp 0
 return
 function Bat.move 0
-push this 19
+push argument 0
+pop pointer 0
+push this 4
 push constant 1
 eq
 not
 if-goto Bat.move.IF_FALSE.228
-push this 15
+push this 0
 push constant 4
 sub
-pop this 15
-push this 15
+pop this 0
+push this 0
 push constant 0
 lt
 not
 if-goto Bat.move.IF_FALSE.242
 push constant 0
-pop this 15
+pop this 0
 goto Bat.move.IF_END.242
 label Bat.move.IF_FALSE.242
 label Bat.move.IF_END.242
 push constant 0
 call Screen.setColor 1
-push this 15
-push this 17
+pop temp 0
+push this 0
+push this 2
 add
 push constant 1
 add
-push this 16
-push this 15
-push this 17
+push this 1
+push this 0
+push this 2
 add
 push constant 4
 add
-push this 16
-push this 18
+push this 1
+push this 3
 add
 call Screen.drawRectangle 4
+pop temp 0
 push constant 1
 neg
 call Screen.setColor 1
-push this 15
-push this 16
-push this 15
+pop temp 0
+push this 0
+push this 1
+push this 0
 push constant 3
 add
-push this 16
-push this 18
+push this 1
+push this 3
 add
 call Screen.drawRectangle 4
+pop temp 0
 goto Bat.move.IF_END.228
 label Bat.move.IF_FALSE.228
-push this 15
+push this 0
 push constant 4
 add
-pop this 15
-push this 15
-push this 17
+pop this 0
+push this 0
+push this 2
 add
 push constant 511
 gt
 not
 if-goto Bat.move.IF_FALSE.327
 push constant 511
-push this 17
+push this 2
 sub
-pop this 15
+pop this 0
 goto Bat.move.IF_END.327
 label Bat.move.IF_FALSE.327
 label Bat.move.IF_END.327
 push constant 0
 call Screen.setColor 1
-push this 15
+pop temp 0
+push this 0
 push constant 4
 sub
-push this 16
-push this 15
+push this 1
+push this 0
 push constant 1
 sub
-push this 16
-push this 18
+push this 1
+push this 3
 add
 call Screen.drawRectangle 4
+pop temp 0
 push constant 1
 neg
 call Screen.setColor 1
-push this 15
-push this 17
+pop temp 0
+push this 0
+push this 2
 add
 push constant 3
 sub
-push this 16
-push this 15
-push this 17
+push this 1
+push this 0
+push this 2
 add
-push this 16
-push this 18
+push this 1
+push this 3
 add
 call Screen.drawRectangle 4
+pop temp 0
 label Bat.move.IF_END.228
 return
 function Main.main 1
 call PongGame.newInstance 0
+pop temp 0
 call PongGame.getInstance 0
 pop local 0
-call game.run 0
-call game.dispose 0
+push local 0
+call PongGame.run 1
+pop temp 0
+push local 0
+call PongGame.dispose 1
+pop temp 0
 return
 function PongGame.new 0
-call Screen.clearScreen 0
-push constant 50
-pop this 26
-push constant 230
-push constant 229
-push this 26
 push constant 7
-push constant 24
 call Memory.alloc 1
 pop pointer 0
+call Screen.clearScreen 0
+pop temp 0
+push constant 50
+pop this 6
+push constant 230
+push constant 229
+push this 6
+push constant 7
 call Bat.new 4
-pop this 20
+pop this 0
 push constant 253
 push constant 222
 push constant 0
 push constant 511
 push constant 0
 push constant 229
-push constant 24
-call Memory.alloc 1
-pop pointer 0
 call Ball.new 6
-pop this 21
+pop this 1
+push this 1
 push constant 400
 push constant 0
-call ball.setDestination 2
+call Ball.setDestination 3
+pop temp 0
 push constant 0
 push constant 238
 push constant 511
 push constant 240
 call Screen.drawRectangle 4
+pop temp 0
 push constant 22
 push constant 0
 call Output.moveCursor 2
-call String.new 1
+pop temp 0
 push constant 8
+call String.new 1
 push constant 83
-call String.appendChar 1
+call String.appendChar 2
 push constant 99
-call String.appendChar 1
+call String.appendChar 2
 push constant 111
-call String.appendChar 1
+call String.appendChar 2
 push constant 114
-call String.appendChar 1
+call String.appendChar 2
 push constant 101
-call String.appendChar 1
+call String.appendChar 2
 push constant 58
-call String.appendChar 1
+call String.appendChar 2
 push constant 32
-call String.appendChar 1
+call String.appendChar 2
 push constant 48
-call String.appendChar 1
+call String.appendChar 2
 call Output.printString 1
+pop temp 0
 push constant 0
-pop this 23
+pop this 3
 push constant 0
-pop this 24
+pop this 4
 push constant 0
-pop this 22
+pop this 2
 push constant 0
-pop this 25
+pop this 5
 push pointer 0
 return
 function PongGame.dispose 0
-call bat.dispose 0
-call ball.dispose 0
+push argument 0
+pop pointer 0
+push this 0
+call Bat.dispose 1
+pop temp 0
+push this 1
+call Ball.dispose 1
+pop temp 0
 push pointer 0
 call Memory.deAlloc 1
+pop temp 0
 return
 function PongGame.newInstance 0
-push constant 24
-call Memory.alloc 1
-pop pointer 0
 call PongGame.new 0
 pop static 0
 return
@@ -636,8 +728,10 @@ function PongGame.getInstance 0
 push static 0
 return
 function PongGame.run 1
+push argument 0
+pop pointer 0
 label PongGame.run.WHILE.224
-push this 23
+push this 3
 not
 not
 if-goto PongGame.run.EXIT_WHILE.224
@@ -645,17 +739,22 @@ label PongGame.run.WHILE.230
 push local 0
 push constant 0
 eq
-push this 23
+push this 3
 not
 and
 not
 if-goto PongGame.run.EXIT_WHILE.230
 call Keyboard.keyPressed 0
 pop local 0
-call bat.move 0
-call PongGame.moveBall 0
+push this 0
+call Bat.move 1
+pop temp 0
+push pointer 0
+call PongGame.moveBall 1
+pop temp 0
 push constant 50
 call Sys.wait 1
+pop temp 0
 goto PongGame.run.WHILE.230
 label PongGame.run.EXIT_WHILE.230
 push local 0
@@ -663,8 +762,10 @@ push constant 130
 eq
 not
 if-goto PongGame.run.IF_FALSE.274
+push this 0
 push constant 1
-call bat.setDirection 1
+call Bat.setDirection 2
+pop temp 0
 goto PongGame.run.IF_END.274
 label PongGame.run.IF_FALSE.274
 push local 0
@@ -672,8 +773,10 @@ push constant 132
 eq
 not
 if-goto PongGame.run.IF_FALSE.292
+push this 0
 push constant 2
-call bat.setDirection 1
+call Bat.setDirection 2
+pop temp 0
 goto PongGame.run.IF_END.292
 label PongGame.run.IF_FALSE.292
 push local 0
@@ -683,7 +786,7 @@ not
 if-goto PongGame.run.IF_FALSE.310
 push constant 1
 neg
-pop this 23
+pop this 3
 goto PongGame.run.IF_END.310
 label PongGame.run.IF_FALSE.310
 label PongGame.run.IF_END.310
@@ -694,78 +797,92 @@ push local 0
 push constant 0
 eq
 not
-push this 23
+push this 3
 not
 and
 not
 if-goto PongGame.run.EXIT_WHILE.325
 call Keyboard.keyPressed 0
 pop local 0
-call bat.move 0
-call PongGame.moveBall 0
+push this 0
+call Bat.move 1
+pop temp 0
+push pointer 0
+call PongGame.moveBall 1
+pop temp 0
 push constant 50
 call Sys.wait 1
+pop temp 0
 goto PongGame.run.WHILE.325
 label PongGame.run.EXIT_WHILE.325
 goto PongGame.run.WHILE.224
 label PongGame.run.EXIT_WHILE.224
-push this 23
+push this 3
 not
 if-goto PongGame.run.IF_FALSE.373
 push constant 10
 push constant 27
 call Output.moveCursor 2
-call String.new 1
+pop temp 0
 push constant 9
+call String.new 1
 push constant 71
-call String.appendChar 1
+call String.appendChar 2
 push constant 97
-call String.appendChar 1
+call String.appendChar 2
 push constant 109
-call String.appendChar 1
+call String.appendChar 2
 push constant 101
-call String.appendChar 1
+call String.appendChar 2
 push constant 32
-call String.appendChar 1
+call String.appendChar 2
 push constant 79
-call String.appendChar 1
+call String.appendChar 2
 push constant 118
-call String.appendChar 1
+call String.appendChar 2
 push constant 101
-call String.appendChar 1
+call String.appendChar 2
 push constant 114
-call String.appendChar 1
+call String.appendChar 2
 call Output.printString 1
+pop temp 0
 goto PongGame.run.IF_END.373
 label PongGame.run.IF_FALSE.373
 label PongGame.run.IF_END.373
 return
 function PongGame.moveBall 5
-call ball.move 0
-pop this 22
-push this 22
+push argument 0
+pop pointer 0
+push this 1
+call Ball.move 1
+pop this 2
+push this 2
 push constant 0
 gt
-push this 22
-push this 25
+push this 2
+push this 5
 eq
 not
 and
 not
 if-goto PongGame.moveBall.IF_FALSE.427
-push this 22
-pop this 25
+push this 2
+pop this 5
 push constant 0
 pop local 0
-call bat.getLeft 0
+push this 0
+call Bat.getLeft 1
 pop local 1
-call bat.getRight 0
+push this 0
+call Bat.getRight 1
 pop local 2
-call ball.getLeft 0
+push this 1
+call Ball.getLeft 1
 pop local 3
-call ball.getRight 0
+push this 1
+call Ball.getRight 1
 pop local 4
-push this 22
+push this 2
 push constant 4
 eq
 not
@@ -777,8 +894,8 @@ push local 2
 push local 3
 lt
 or
-pop this 23
-push this 23
+pop this 3
+push this 3
 not
 not
 if-goto PongGame.moveBall.IF_FALSE.513
@@ -807,29 +924,35 @@ goto PongGame.moveBall.IF_END.539
 label PongGame.moveBall.IF_FALSE.539
 label PongGame.moveBall.IF_END.539
 label PongGame.moveBall.IF_END.519
-push this 26
+push this 6
 push constant 2
 sub
-pop this 26
-push this 26
-call bat.setWidth 1
-push this 24
+pop this 6
+push this 0
+push this 6
+call Bat.setWidth 2
+pop temp 0
+push this 4
 push constant 1
 add
-pop this 24
+pop this 4
 push constant 22
 push constant 7
 call Output.moveCursor 2
-push this 24
+pop temp 0
+push this 4
 call Output.printInt 1
+pop temp 0
 goto PongGame.moveBall.IF_END.513
 label PongGame.moveBall.IF_FALSE.513
 label PongGame.moveBall.IF_END.513
 goto PongGame.moveBall.IF_END.491
 label PongGame.moveBall.IF_FALSE.491
 label PongGame.moveBall.IF_END.491
+push this 1
 push local 0
-call ball.bounce 1
+call Ball.bounce 2
+pop temp 0
 goto PongGame.moveBall.IF_END.427
 label PongGame.moveBall.IF_FALSE.427
 label PongGame.moveBall.IF_END.427

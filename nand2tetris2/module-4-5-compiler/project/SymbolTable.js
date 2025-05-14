@@ -27,21 +27,26 @@ const symbolTable = {
 		context.table[name] = { type, kind, index };
 		context.counters[kind]++;
 	},
+	startClass() {
+		const table = symbolTable["class"];
+		table.table = {};
+		table.counters["field"] = 0;
+		table.counters["static"] = 0;
+	},
 	startSubroutine(className, subroutineType) {
 		const table = symbolTable["subroutine"];
-
-		if (this.subroutineType === "method") {
-			this.subroutine.table = { this: { type: className, kind: "argument", index: 0 } };
-		}
-
+		table.table = {};
 		table.counters["argument"] = 0;
 		table.counters["var"] = 0;
+
+		if (subroutineType === "method") {
+			table.table["this"] = { type: className, kind: "argument", index: 0 };
+			table.counters["argument"] = 1;
+		}
 	},
 	getFieldCount(className) {
-		return Object.values(this.class.table).filter(
-			entry => entry.kind === "field"
-		).length;
-	}
+		return Object.values(this.class.table).filter(entry => entry.kind === "field").length;
+	},
 };
 
 module.exports = symbolTable;

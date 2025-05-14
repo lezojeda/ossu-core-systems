@@ -1,9 +1,5 @@
 class Main {
     function void main() {
-        var Point p;
-        let p = Point.new(10, 20);  // Create a Point with x=10, y=20
-        do Output.printInt(p.getX()); // Should print 10
-        do Output.printInt(p.getY()); // Should print 20
-        return;
+        do Output.printString("Score: 0");
     }
 }

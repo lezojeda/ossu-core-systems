@@ -9,6 +9,7 @@ function compile(tokens, pointer = 0) {
 }
 
 function compileClass(tokens, pointer) {
+	symbolTable.startClass();
 	let code = "";
 
 	pointer++; // 'class'
@@ -107,7 +108,8 @@ function compileParameterList(tokens, pointer, context) {
 		pointer++; // parameter type
 
 		const parameterName = tokens[pointer].value;
-		symbolTable.defineSubroutineSymbol(parameterName, context.className, "argument");
+		const type = tokens[pointer - 1].value;
+		symbolTable.defineSubroutineSymbol(parameterName, type, "argument");
 		pointer++; // parameter name
 		count++;
 
@@ -241,7 +243,7 @@ function compileDo(tokens, pointer, context) {
 	pointer++; // 'do'
 
 	const subroutineCallResult = compileSubroutineCall(tokens, pointer, context);
-	code += subroutineCallResult.code;
+	code += subroutineCallResult.code + VMWriter.writePop("temp", 0);
 	pointer = subroutineCallResult.pointer;
 
 	pointer++; // ';'
@@ -418,12 +420,12 @@ function compileTerm(tokens, pointer, context) {
 		const stringValue = tokens[pointer].value;
 		const stringLength = stringValue.length;
 
-		code += VMWriter.writeCall("String.new", 1);
 		code += VMWriter.writePush("constant", stringLength);
+		code += VMWriter.writeCall("String.new", 1);
 
 		for (let i = 0; i < stringLength; i++) {
 			code += VMWriter.writePush("constant", stringValue.charCodeAt(i));
-			code += VMWriter.writeCall("String.appendChar", 1);
+			code += VMWriter.writeCall("String.appendChar", 2);
 		}
 
 		pointer++;
@@ -463,8 +465,7 @@ function compileTerm(tokens, pointer, context) {
 		pointer = subroutineCallResult.pointer;
 	} else {
 		const varName = tokens[pointer++].value;
-		const { segment, index } = resolveVarName(varName);
-		code += VMWriter.writePush(segment === "field" ? "this" : segment, index);
+		code += VMWriter.writePush(resolveSegment(varName), resolveIndex(varName));
 	}
 	return { code, pointer };
 }
