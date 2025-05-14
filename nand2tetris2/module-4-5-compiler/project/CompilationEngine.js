@@ -80,26 +80,6 @@ function compileSubroutine(tokens, pointer, context) {
 	return { code, pointer };
 }
 
-function compileTerminalToken(token) {
-	const { tokenType, value } = token;
-	let tag =
-		tokenType === "INT_CONST"
-			? "integerConstant"
-			: tokenType === "STRING_CONST"
-			? "stringConstant"
-			: tokenType.toLowerCase();
-
-	// Escape special characters for symbols
-	let escapedValue = value;
-	if (tag === "symbol") {
-		if (value === "<") escapedValue = "&lt;";
-		else if (value === ">") escapedValue = "&gt;";
-		else if (value === "&") escapedValue = "&amp;";
-	}
-
-	return `<${tag}> ${escapedValue} </${tag}>\n`;
-}
-
 function compileParameterList(tokens, pointer, context) {
 	let code = "";
 	let count = 0;
@@ -265,13 +245,13 @@ function compileLet(tokens, pointer, context) {
 	pointer++; // varName
 
 	if (tokens[pointer].value === "[") {
-		code += compileTerminalToken(tokens[pointer++]); // '['
+		pointer++; // '['
 
 		const expressionResult = compileExpression(tokens, pointer, context);
 		code += expressionResult.code;
 		pointer = expressionResult.pointer;
 
-		code += compileTerminalToken(tokens[pointer++]); // ']'
+		pointer++; // ']'
 	}
 
 	pointer++; // '='
@@ -453,12 +433,14 @@ function compileTerm(tokens, pointer, context) {
 		pointer = expressionResult.pointer;
 		pointer++;
 	} else if (nextToken.value === "[") {
-		code += compileTerminalToken(tokens[pointer++]);
-		code += compileTerminalToken(tokens[pointer++]);
+		pointer++;
+		pointer++;
+
 		const expressionResult = compileExpression(tokens, pointer, context);
 		code += expressionResult.code;
 		pointer = expressionResult.pointer;
-		code += compileTerminalToken(tokens[pointer++]);
+	
+		pointer++;
 	} else if (nextToken.value === "." || nextToken.value === "(") {
 		const subroutineCallResult = compileSubroutineCall(tokens, pointer, context);
 		code += subroutineCallResult.code;
