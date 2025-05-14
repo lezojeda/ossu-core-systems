@@ -1,0 +1,498 @@
+function Main.main 1
+call SquareGame.new 0
+pop local 0
+push local 0
+call SquareGame.run 1
+pop temp 0
+push local 0
+call SquareGame.dispose 1
+pop temp 0
+return
+function Square.new 0
+push constant 3
+call Memory.alloc 1
+pop pointer 0
+push argument 0
+pop this 0
+push argument 1
+pop this 1
+push argument 2
+pop this 2
+push pointer 0
+call Square.draw 1
+pop temp 0
+push pointer 0
+return
+function Square.dispose 0
+push argument 0
+pop pointer 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+return
+function Square.draw 0
+push argument 0
+pop pointer 0
+push constant 1
+neg
+call Screen.setColor 1
+pop temp 0
+push this 0
+push this 1
+push this 0
+push this 2
+add
+push this 1
+push this 2
+add
+call Screen.drawRectangle 4
+pop temp 0
+return
+function Square.erase 0
+push argument 0
+pop pointer 0
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push this 0
+push this 1
+push this 0
+push this 2
+add
+push this 1
+push this 2
+add
+call Screen.drawRectangle 4
+pop temp 0
+return
+function Square.incSize 0
+push argument 0
+pop pointer 0
+push this 1
+push this 2
+add
+push constant 254
+lt
+push this 0
+push this 2
+add
+push constant 510
+lt
+and
+not
+if-goto Square.incSize.IF_FALSE.144
+push pointer 0
+call Square.erase 1
+pop temp 0
+push this 2
+push constant 2
+add
+pop this 2
+push pointer 0
+call Square.draw 1
+pop temp 0
+goto Square.incSize.IF_END.144
+label Square.incSize.IF_FALSE.144
+label Square.incSize.IF_END.144
+return
+function Square.decSize 0
+push argument 0
+pop pointer 0
+push this 2
+push constant 2
+gt
+not
+if-goto Square.decSize.IF_FALSE.194
+push pointer 0
+call Square.erase 1
+pop temp 0
+push this 2
+push constant 2
+sub
+pop this 2
+push pointer 0
+call Square.draw 1
+pop temp 0
+goto Square.decSize.IF_END.194
+label Square.decSize.IF_FALSE.194
+label Square.decSize.IF_END.194
+return
+function Square.moveUp 0
+push argument 0
+pop pointer 0
+push this 1
+push constant 1
+gt
+not
+if-goto Square.moveUp.IF_FALSE.228
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push this 0
+push this 1
+push this 2
+add
+push constant 1
+sub
+push this 0
+push this 2
+add
+push this 1
+push this 2
+add
+call Screen.drawRectangle 4
+pop temp 0
+push this 1
+push constant 2
+sub
+pop this 1
+push constant 1
+neg
+call Screen.setColor 1
+pop temp 0
+push this 0
+push this 1
+push this 0
+push this 2
+add
+push this 1
+push constant 1
+add
+call Screen.drawRectangle 4
+pop temp 0
+goto Square.moveUp.IF_END.228
+label Square.moveUp.IF_FALSE.228
+label Square.moveUp.IF_END.228
+return
+function Square.moveDown 0
+push argument 0
+pop pointer 0
+push this 1
+push this 2
+add
+push constant 254
+lt
+not
+if-goto Square.moveDown.IF_FALSE.310
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push this 0
+push this 1
+push this 0
+push this 2
+add
+push this 1
+push constant 1
+add
+call Screen.drawRectangle 4
+pop temp 0
+push this 1
+push constant 2
+add
+pop this 1
+push constant 1
+neg
+call Screen.setColor 1
+pop temp 0
+push this 0
+push this 1
+push this 2
+add
+push constant 1
+sub
+push this 0
+push this 2
+add
+push this 1
+push this 2
+add
+call Screen.drawRectangle 4
+pop temp 0
+goto Square.moveDown.IF_END.310
+label Square.moveDown.IF_FALSE.310
+label Square.moveDown.IF_END.310
+return
+function Square.moveLeft 0
+push argument 0
+pop pointer 0
+push this 0
+push constant 1
+gt
+not
+if-goto Square.moveLeft.IF_FALSE.396
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push this 0
+push this 2
+add
+push constant 1
+sub
+push this 1
+push this 0
+push this 2
+add
+push this 1
+push this 2
+add
+call Screen.drawRectangle 4
+pop temp 0
+push this 0
+push constant 2
+sub
+pop this 0
+push constant 1
+neg
+call Screen.setColor 1
+pop temp 0
+push this 0
+push this 1
+push this 0
+push constant 1
+add
+push this 1
+push this 2
+add
+call Screen.drawRectangle 4
+pop temp 0
+goto Square.moveLeft.IF_END.396
+label Square.moveLeft.IF_FALSE.396
+label Square.moveLeft.IF_END.396
+return
+function Square.moveRight 0
+push argument 0
+pop pointer 0
+push this 0
+push this 2
+add
+push constant 510
+lt
+not
+if-goto Square.moveRight.IF_FALSE.478
+push constant 0
+call Screen.setColor 1
+pop temp 0
+push this 0
+push this 1
+push this 0
+push constant 1
+add
+push this 1
+push this 2
+add
+call Screen.drawRectangle 4
+pop temp 0
+push this 0
+push constant 2
+add
+pop this 0
+push constant 1
+neg
+call Screen.setColor 1
+pop temp 0
+push this 0
+push this 2
+add
+push constant 1
+sub
+push this 1
+push this 0
+push this 2
+add
+push this 1
+push this 2
+add
+call Screen.drawRectangle 4
+pop temp 0
+goto Square.moveRight.IF_END.478
+label Square.moveRight.IF_FALSE.478
+label Square.moveRight.IF_END.478
+return
+function SquareGame.new 0
+push constant 2
+call Memory.alloc 1
+pop pointer 0
+push constant 0
+push constant 0
+push constant 30
+call Square.new 3
+pop this 0
+push constant 0
+pop this 1
+push pointer 0
+return
+function SquareGame.dispose 0
+push argument 0
+pop pointer 0
+push this 0
+call Square.dispose 1
+pop temp 0
+push pointer 0
+call Memory.deAlloc 1
+pop temp 0
+return
+function SquareGame.moveSquare 0
+push argument 0
+pop pointer 0
+push this 1
+push constant 1
+eq
+not
+if-goto SquareGame.moveSquare.IF_FALSE.70
+push this 0
+call Square.moveUp 1
+pop temp 0
+goto SquareGame.moveSquare.IF_END.70
+label SquareGame.moveSquare.IF_FALSE.70
+label SquareGame.moveSquare.IF_END.70
+push this 1
+push constant 2
+eq
+not
+if-goto SquareGame.moveSquare.IF_FALSE.85
+push this 0
+call Square.moveDown 1
+pop temp 0
+goto SquareGame.moveSquare.IF_END.85
+label SquareGame.moveSquare.IF_FALSE.85
+label SquareGame.moveSquare.IF_END.85
+push this 1
+push constant 3
+eq
+not
+if-goto SquareGame.moveSquare.IF_FALSE.100
+push this 0
+call Square.moveLeft 1
+pop temp 0
+goto SquareGame.moveSquare.IF_END.100
+label SquareGame.moveSquare.IF_FALSE.100
+label SquareGame.moveSquare.IF_END.100
+push this 1
+push constant 4
+eq
+not
+if-goto SquareGame.moveSquare.IF_FALSE.115
+push this 0
+call Square.moveRight 1
+pop temp 0
+goto SquareGame.moveSquare.IF_END.115
+label SquareGame.moveSquare.IF_FALSE.115
+label SquareGame.moveSquare.IF_END.115
+push constant 5
+call Sys.wait 1
+pop temp 0
+return
+function SquareGame.run 2
+push argument 0
+pop pointer 0
+push constant 0
+pop local 1
+label SquareGame.run.WHILE.160
+push local 1
+not
+not
+if-goto SquareGame.run.EXIT_WHILE.160
+label SquareGame.run.WHILE.166
+push local 0
+push constant 0
+eq
+not
+if-goto SquareGame.run.EXIT_WHILE.166
+call Keyboard.keyPressed 0
+pop local 0
+push pointer 0
+call SquareGame.moveSquare 1
+pop temp 0
+goto SquareGame.run.WHILE.166
+label SquareGame.run.EXIT_WHILE.166
+push local 0
+push constant 81
+eq
+not
+if-goto SquareGame.run.IF_FALSE.188
+push constant 1
+neg
+pop local 1
+goto SquareGame.run.IF_END.188
+label SquareGame.run.IF_FALSE.188
+label SquareGame.run.IF_END.188
+push local 0
+push constant 90
+eq
+not
+if-goto SquareGame.run.IF_FALSE.201
+push this 0
+call Square.decSize 1
+pop temp 0
+goto SquareGame.run.IF_END.201
+label SquareGame.run.IF_FALSE.201
+label SquareGame.run.IF_END.201
+push local 0
+push constant 88
+eq
+not
+if-goto SquareGame.run.IF_FALSE.216
+push this 0
+call Square.incSize 1
+pop temp 0
+goto SquareGame.run.IF_END.216
+label SquareGame.run.IF_FALSE.216
+label SquareGame.run.IF_END.216
+push local 0
+push constant 131
+eq
+not
+if-goto SquareGame.run.IF_FALSE.231
+push constant 1
+pop this 1
+goto SquareGame.run.IF_END.231
+label SquareGame.run.IF_FALSE.231
+label SquareGame.run.IF_END.231
+push local 0
+push constant 133
+eq
+not
+if-goto SquareGame.run.IF_FALSE.244
+push constant 2
+pop this 1
+goto SquareGame.run.IF_END.244
+label SquareGame.run.IF_FALSE.244
+label SquareGame.run.IF_END.244
+push local 0
+push constant 130
+eq
+not
+if-goto SquareGame.run.IF_FALSE.257
+push constant 3
+pop this 1
+goto SquareGame.run.IF_END.257
+label SquareGame.run.IF_FALSE.257
+label SquareGame.run.IF_END.257
+push local 0
+push constant 132
+eq
+not
+if-goto SquareGame.run.IF_FALSE.270
+push constant 4
+pop this 1
+goto SquareGame.run.IF_END.270
+label SquareGame.run.IF_FALSE.270
+label SquareGame.run.IF_END.270
+label SquareGame.run.WHILE.283
+push local 0
+push constant 0
+eq
+not
+not
+if-goto SquareGame.run.EXIT_WHILE.283
+call Keyboard.keyPressed 0
+pop local 0
+push pointer 0
+call SquareGame.moveSquare 1
+pop temp 0
+goto SquareGame.run.WHILE.283
+label SquareGame.run.EXIT_WHILE.283
+goto SquareGame.run.WHILE.160
+label SquareGame.run.EXIT_WHILE.160
+return

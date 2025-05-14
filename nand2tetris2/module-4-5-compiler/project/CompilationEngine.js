@@ -232,48 +232,61 @@ function compileDo(tokens, pointer, context) {
 }
 
 function compileLet(tokens, pointer, context) {
-	// 'let' varName ('[' expression ']')? '=' expression ';'
+	// 'let' varName ('[' expr1 ']')? '=' expr2 ';'
 
-	let code = "";
 	pointer++; // 'let'
 
-	// resolve varname to write pop at the end
 	const varName = tokens[pointer].value;
+	let code = "";
 
-	const { index } = resolveVarName(varName);
+	const nextToken = tokens[pointer + 1].value;
 
-	pointer++; // varName
-
-	if (tokens[pointer].value === "[") {
+	let isArrayAssignent = false;
+	if (nextToken === "[") {
+		isArrayAssignent = true;
+		pointer++; // varName
 		pointer++; // '['
 
-		const expressionResult = compileExpression(tokens, pointer, context);
-		code += expressionResult.code;
-		pointer = expressionResult.pointer;
+		code += VMWriter.writePush(resolveSegment(varName), resolveIndex(varName));
 
+		const expr1Result = compileExpression(tokens, pointer, context);
+		code += expr1Result.code; // Push value of expr1 (e.g., a[3])
+		pointer = expr1Result.pointer;
+
+		code += VMWriter.writeArithmetic("add");
 		pointer++; // ']'
+	} else {
+		pointer++; // varName
 	}
 
 	pointer++; // '='
 
-	// Expression
+	// expr2
 	const expressionResult = compileExpression(tokens, pointer, context);
 	code += expressionResult.code;
 	pointer = expressionResult.pointer;
 
 	pointer++; // ';'
-	code += VMWriter.writePop(resolveSegment(varName), index);
+
+	if (isArrayAssignent) {
+		code += VMWriter.writePop("temp", 0);
+		code += VMWriter.writePop("pointer", 1);
+		code += VMWriter.writePush("temp", 0);
+		code += VMWriter.writePop("that", 0);
+	} else {
+		code += VMWriter.writePop(resolveSegment(varName), resolveIndex(varName));
+	}
 
 	return { code, pointer };
 }
 
 function compileWhile(tokens, pointer, context) {
 	// 'while' '(' expression ')' '{' statements '}'
+	let code = "";
 	const label = `${context.className}.${context.subroutineName}`;
 	const whileLabel = `${label}.WHILE.${pointer}`;
 	const exitWhile = `${label}.EXIT_WHILE.${pointer}`;
 
-	let code = "";
 	pointer++; // 'while'
 	pointer++; // '('
 
@@ -395,7 +408,7 @@ function compileTerm(tokens, pointer, context) {
 	const token = tokens[pointer];
 	const nextToken = tokens[pointer + 1] || {};
 
-	const pushConstant = (value) => {
+	const pushConstant = value => {
 		code += VMWriter.writePush("constant", value);
 	};
 
@@ -419,16 +432,22 @@ function compileTerm(tokens, pointer, context) {
 		case "IDENTIFIER":
 			if (nextToken.value === "[") {
 				const varName = token.value;
-				pointer += 2; // skip varName and '['
+				const baseSegment = resolveSegment(varName);
+				const baseIndex = resolveIndex(varName);
 
-				const expr = compileExpression(tokens, pointer, context);
-				code += VMWriter.writePush(resolveSegment(varName), resolveIndex(varName));
+				code += VMWriter.writePush(baseSegment, baseIndex);
+				pointer++; // skip varName
+				pointer++; // skip '['
 
-				code += expr.code;
-				code += VMWriter.writeArithmetic("add");
+				const exprResult = compileExpression(tokens, pointer, context);
+
+				code += exprResult.code; // push offset
+
+				code += VMWriter.writeArithmetic("add"); // base + offset
 				code += VMWriter.writePop("pointer", 1);
 				code += VMWriter.writePush("that", 0);
-				pointer = expr.pointer + 1; // skip ']'
+
+				pointer = exprResult.pointer + 1; // skip ']'
 			} else if (nextToken.value === "." || nextToken.value === "(") {
 				const call = compileSubroutineCall(tokens, pointer, context);
 				code += call.code;
@@ -480,7 +499,6 @@ function compileTerm(tokens, pointer, context) {
 	return { code, pointer };
 }
 
-
 function compileExpressionList(tokens, pointer, context) {
 	let code = "";
 	let count = 0;
@@ -507,8 +525,8 @@ function compileExpressionList(tokens, pointer, context) {
 }
 
 function compileSubroutineCall(tokens, pointer, context) {
-	let code = "";
 	const identifier = tokens[pointer].value; // ClassName or varName
+	let code = "";
 	let f = `${context.className}.${identifier}`;
 	pointer++;
 
