@@ -392,65 +392,94 @@ function compileExpression(tokens, pointer, context) {
 
 function compileTerm(tokens, pointer, context) {
 	let code = "";
+	const token = tokens[pointer];
 	const nextToken = tokens[pointer + 1] || {};
 
-	if (tokens[pointer].tokenType === "INT_CONST") {
-		code += VMWriter.writePush("constant", tokens[pointer++].value);
-	} else if (tokens[pointer].tokenType === "STRING_CONST") {
-		const stringValue = tokens[pointer].value;
-		const stringLength = stringValue.length;
+	const pushConstant = (value) => {
+		code += VMWriter.writePush("constant", value);
+	};
 
-		code += VMWriter.writePush("constant", stringLength);
-		code += VMWriter.writeCall("String.new", 1);
+	switch (token.tokenType) {
+		case "INT_CONST":
+			pushConstant(token.value);
+			pointer++;
+			break;
 
-		for (let i = 0; i < stringLength; i++) {
-			code += VMWriter.writePush("constant", stringValue.charCodeAt(i));
-			code += VMWriter.writeCall("String.appendChar", 2);
-		}
+		case "STRING_CONST":
+			const str = token.value;
+			pushConstant(str.length);
+			code += VMWriter.writeCall("String.new", 1);
+			for (let i = 0; i < str.length; i++) {
+				pushConstant(str.charCodeAt(i));
+				code += VMWriter.writeCall("String.appendChar", 2);
+			}
+			pointer++;
+			break;
 
-		pointer++;
-	} else if (tokens[pointer].value === "this") {
-		code += VMWriter.writePush("pointer", 0);
-		pointer++;
-	} else if (tokens[pointer].value === "true") {
-		code += VMWriter.writePush("constant", 1);
-		code += VMWriter.writeArithmetic("neg");
-		pointer++;
-	} else if (["false", "null"].includes(tokens[pointer].value)) {
-		code += VMWriter.writePush("constant", 0);
-		pointer++;
-	} else if (["-", "~"].includes(tokens[pointer].value)) {
-		const op = tokens[pointer].value === "-" ? "neg" : "not";
-		pointer++;
-		const termResult = compileTerm(tokens, pointer, context);
-		code += termResult.code; // Compile term first (e.g., push constant 1)
-		code += VMWriter.writeArithmetic(op); // Apply neg or not after
-		pointer = termResult.pointer;
-	} else if (tokens[pointer].value === "(") {
-		pointer++;
-		const expressionResult = compileExpression(tokens, pointer, context);
-		code += expressionResult.code;
-		pointer = expressionResult.pointer;
-		pointer++;
-	} else if (nextToken.value === "[") {
-		pointer++;
-		pointer++;
+		case "IDENTIFIER":
+			if (nextToken.value === "[") {
+				const varName = token.value;
+				pointer += 2; // skip varName and '['
 
-		const expressionResult = compileExpression(tokens, pointer, context);
-		code += expressionResult.code;
-		pointer = expressionResult.pointer;
-	
-		pointer++;
-	} else if (nextToken.value === "." || nextToken.value === "(") {
-		const subroutineCallResult = compileSubroutineCall(tokens, pointer, context);
-		code += subroutineCallResult.code;
-		pointer = subroutineCallResult.pointer;
-	} else {
-		const varName = tokens[pointer++].value;
-		code += VMWriter.writePush(resolveSegment(varName), resolveIndex(varName));
+				const expr = compileExpression(tokens, pointer, context);
+				code += VMWriter.writePush(resolveSegment(varName), resolveIndex(varName));
+
+				code += expr.code;
+				code += VMWriter.writeArithmetic("add");
+				code += VMWriter.writePop("pointer", 1);
+				code += VMWriter.writePush("that", 0);
+				pointer = expr.pointer + 1; // skip ']'
+			} else if (nextToken.value === "." || nextToken.value === "(") {
+				const call = compileSubroutineCall(tokens, pointer, context);
+				code += call.code;
+				pointer = call.pointer;
+			} else {
+				const varName = token.value;
+				code += VMWriter.writePush(resolveSegment(varName), resolveIndex(varName));
+				pointer++;
+			}
+			break;
+
+		case "KEYWORD":
+			switch (token.value) {
+				case "this":
+					code += VMWriter.writePush("pointer", 0);
+					break;
+				case "true":
+					pushConstant(1);
+					code += VMWriter.writeArithmetic("neg");
+					break;
+				case "false":
+				case "null":
+					pushConstant(0);
+					break;
+			}
+			pointer++;
+			break;
+
+		case "SYMBOL":
+			if (token.value === "(") {
+				pointer++;
+				const expr = compileExpression(tokens, pointer, context);
+				code += expr.code;
+				pointer = expr.pointer + 1; // skip ')'
+			} else if (token.value === "-" || token.value === "~") {
+				const op = token.value === "-" ? "neg" : "not";
+				pointer++;
+				const term = compileTerm(tokens, pointer, context);
+				code += term.code;
+				code += VMWriter.writeArithmetic(op);
+				pointer = term.pointer;
+			}
+			break;
+
+		default:
+			throw new Error(`Unexpected token: ${token.value}`);
 	}
+
 	return { code, pointer };
 }
+
 
 function compileExpressionList(tokens, pointer, context) {
 	let code = "";
