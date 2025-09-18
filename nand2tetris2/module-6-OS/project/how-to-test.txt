@@ -1,0 +1,4 @@
+1. put OS-module.jack and Main.jack files in same directory
+2. compile directory
+3. execute directory in the VM emulator
+if the emulator finds a provided OS module implementation, it'll use that one

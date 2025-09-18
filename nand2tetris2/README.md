@@ -47,3 +47,15 @@ Build the first part of the Jack compiler, the syntax analyzer.
 - memory management
 ### Project
 Finish the Jack compiler into a full-scale compiler.
+## Module 6: Operating System
+- running-time analysis
+- resource allocation
+- heap management
+- input handling,
+- vector graphics
+- fonts
+- textual outputs
+- type conversions
+- string processing
+- booting
+- OS implementation issues.

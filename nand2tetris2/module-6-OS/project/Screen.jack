@@ -1,0 +1,42 @@
+class Screen {
+	function void clearScreen() {
+		
+	}
+
+	function void setColor(boolean b) {
+		
+	}
+
+	function void drawPixel(int x, int y) {
+		// address = 32 * y + x / 16
+		// value = Memory.peek[16384 + address]
+		// set the (x % 16)th bit of value to the current color
+		// do Memory.poke(address, value)
+	}
+
+	function void drawLine(int x1, int y1, int x2, int y2) {
+		// GENERALIZE TO 4 DIRECTIONS
+
+		// dx = x2 - x1; dy = y2 - y1;
+		// a = 0; b = 0; diff = 0;
+		// while (a <= dx) and (b <= dy)
+		//		drawPixel(x + a, y + b);
+
+		// decide if go right or up
+		// demostration of diff is in the lecture, algebra
+		// if (diff < 0) a = a + 1, diff = diff + dy
+		// else b = b + 1, diff = diff + dx
+	}
+
+	function void drawCircle(x, y, r) {
+		// for each dy = -r to r do:
+		//		drawLine(x - sqrt(r^2 - dy^2), 
+		//               y + dy,
+		//               x + sqrt(r^2 - dy^2),
+		//               y + dy)
+	}
+
+	function void drawCircle(int x1, int y1, int x2, int y2) {
+
+	}
+}

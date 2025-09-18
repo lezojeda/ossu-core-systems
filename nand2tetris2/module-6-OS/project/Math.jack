@@ -1,0 +1,48 @@
+class Math {
+	// Handling negative numbers: if the two are two's complement values the algorithm works fine
+	// Overflow: 
+	function multiply(x, y){
+		/**
+		 * w is word length, algorithm's runtime is proportional to word's length
+		 * 
+		 * sum = 0
+		 * shiftedX = x 
+		 * for i = 0 ... w - 1 do
+		 * 	if ((ith bit of y) == 1)
+		 * 		sum = sum + shiftedX
+		 * return sum
+		 */
+	}
+	
+	// Returns the integer part of x / y
+	// where x >= 0 and y > 0
+	// Strategy: recursive algorithm
+	// Handling negatives: divide modules of x and y and then set result's sign
+	// Handling overflow: can be detected when y becomes negative
+	function void divide(x, y) {
+		/**
+		 * if (y > x) return 0
+		 * q = divide(x, 2 * y)
+		 * 
+		 * if ((x - 2) * q * y < y)
+		 * 	return 2 * q
+		 * else
+		 * 	return 2 * q + 1
+		 */
+	}
+	
+	function int sqrt(x) {
+		/**
+		 * y = 0
+		 * for j = n/2 - 1 ... 0 do
+		 * 	if (y+2^j)^2 <= x then y = y + 2^j
+		 * return y
+		 */
+	}
+	
+	// Gets i'th bit of x
+	// To use in the if clause inside loop of multiply
+	function int bit(int x, int i) {
+	
+	}
+}

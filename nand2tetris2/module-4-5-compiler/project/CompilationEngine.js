@@ -32,6 +32,10 @@ function compileClass(tokens, pointer) {
 		pointer = subroutineResult.pointer;
 	}
 
+	// if (tokens[pointer].value !== '}') {
+	// 	throw new Error(`Unexpected token: ${tokens[pointer].value}, expected '}'`);		
+	// }
+
 	pointer++; // '}'
 
 	return { code, pointer };
