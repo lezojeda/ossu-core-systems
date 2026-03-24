@@ -82,3 +82,18 @@ b. $RTT_0 × 2$. In one $RTT_0$ we make use of all 6 parallel connections and th
 c. Since the connection stays open we need 8 $RTT_0$, one for each object
 
 The takeaway is that the amount of $RTT$ goes: parallel HTTP < non-persistent HTTP with parallel connections < non-persistent HTTP without parallel connections
+
+**P13.**
+a. 2000 per each video frame + 3 per each image (5) = 2015
+b. 18. Each round is 6 frame times (1 video + 5 images), each image has 3 frames so 3 x 6 = 18
+
+**P15.** `MAIL FROM` in SMTP is a command required in the handshake between the mail client and the mail server. The `From:` is a header required by the RFC 5322.
+
+**P17.** MTA stands for Mail Transfer Agents. The malicious host was most likely 58.88.21.177 which sent the message through inbnd55.exchangeddd.com since it appears in the `Received:` header which and we assume it was added by the trustworthy mail server. The "Mail from:" can be easily forged.
+
+**P18.**
+a. A whois database contains information about domain names and IP address block among other range of internet entities. They can be queried using the whois protocol to get information about a certain internet resource's registered user or assignee.
+
+b. example.com -> ELLIOTT.NS.CLOUDFLARE.COM, HERA.NS.CLOUDFLARE.COM
+
+uba.ar -> ns3.uba.ar (157.92.6.1/32), ns1.uba.ar and many more
