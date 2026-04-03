@@ -78,3 +78,71 @@ The possible sets are:
 b. What are all possible values of the ACK field in all possible messages
 currently propagating back to the sender at time t? Justify your answer.
 
+Since the receiver is currently expecting packet $k$ every packet it has sent will have an ACK of $k - 1$ or lower, down to $k - 3$ since the window size is 4 (and a propagating packet of $k - 4$ would imply more than 4 packets in transit which can't happen by the protocol definition). So the possible values are $\lbrace k-3, k-2, k-1 \rbrace$
+
+---
+**P30.** Consider the network shown in Scenario 2 in Section 3.6.1. Suppose both sending hosts A and B have some fixed timeout values.
+a. Argue that increasing the size of the finite buffer of the router might pos-
+sibly decrease the throughput ($\lambda_{out}$).
+
+With fixed timeout values but a larger finite buffer the probability of the sender timing out for packets not lost but still in the buffer increases. A larger fraction of the router’s output link capacity is wasted carrying duplicate packets that will eventually be discarded by the receiver.
+
+b. Now suppose both hosts dynamically adjust their timeout values (like what TCP does) based on the buffering delay at the router. Would increasing the buffer size help to increase the throughput? Why?
+
+Yes, because it would avoid premature retransmissions and a higher rate of useful data would come out of the shared output link.
+
+---
+**P40.**
+![[Captura de pantalla 2026-03-27 181756.png]]
+Consider Figure 3.61. Assuming TCP Reno is the protocol experiencing the
+behavior shown above, answer the following questions. In all cases, you
+should provide a short discussion justifying your answer.
+
+**a.** Identify the intervals of time when TCP slow start is operating. From 0 to the 6th transmission round the first time and from 22.5 to the end the second time.
+
+**b.** Identify the intervals of time when TCP congestion avoidance is operating. 6-16 and 18-22.
+
+**c.** After the 16th transmission round, is segment loss detected by a triple
+duplicate ACK or by a timeout? Three ACKs since the `cnwd` wasn't reduced to 1.
+
+**d.** After the 22nd transmission round, is segment loss detected by a triple
+duplicate ACK or by a timeout? Timeout.
+
+**e.** What is the initial value of ssthresh at the first transmission round? 0?
+
+**f.** What is the value of ssthresh at the 18th transmission round? Assuming the value of `cnwd` was 42 when the three ACKs were detected then 42/2 = 21
+
+**g.** What is the value of ssthresh at the 24th transmission round? Assuming `cnwd` at congestion was 28 -> 14
+
+**h.** During what transmission round is the 70th segment sent? The 70th segment is sent during transmission round 7. The round where congestion avoidance starts. This comes from calculating the cumnulative packets sent: in round 1 1 packet was sent (cnwd = 1), then in round 2 3 (cnwd = 2), ..., until round 7 when 96 have been sent from the 63 that had been sent in round 6. So the 70th segment falls in the window of packets sent during round 7.
+
+**i.** Assuming a packet loss is detected after the 26th round by the receipt of
+a triple duplicate ACK, what will be the values of the congestion window
+size and of ssthresh? Since a triple duplicate ACK halves `cnwd` then it'll be 4.
+
+**j.** Suppose TCP Tahoe is used (instead of TCP Reno), and assume that triple
+duplicate ACKs are received at the 16th round. What are the `ssthresh`
+and the congestion window size at the 19th round? TCP Tahoe cuts the congestion window to 1 even if the after a triple-duplicate-ACK indicated loss event. So the values of `cnwd` and `ssthresh` would've been 1 and 21 respectively after round 16. So 17th round 1, 18th round 2 and finally 19th round `cnwd` would have a value of 4.
+
+k. Again suppose TCP Tahoe is used, and there is a timeout event at
+22nd round. How many packets have been sent out from 17th round till
+22nd round, inclusive? 
+
+The timeout happens before the packets are sent so we can follow this table:
+
+| Transmission Round | cwnd at start of round | Packets sent in this round |
+| ------------------ | ---------------------- | -------------------------- |
+| 17                 | 1                      | 1                          |
+| 18                 | 2                      | 2                          |
+| 19                 | 4                      | 4                          |
+| 20                 | 8                      | 8                          |
+| 21                 | 16                     | 16                         |
+| 22                 | 32                     | 32                         |
+Which means a total of 63 packets have been sent from the 17th round till the 22nd.
+
+---
+**P52.** Consider a simplified TCP’s AIMD algorithm where the congestion window size is measured in number of segments, not in bytes. In additive increase, the congestion window size increases by one segment in each RTT. In multiplicative decrease, the congestion window size decreases by half (if the result is not an integer, round down to the nearest integer). Suppose that two TCP connections, $C_1$ and $C_2$, share a single congested link of speed 30 segments per second. Assume that both $C_1$ and $C_2$ are in the congestion avoidance phase. Connection $C_1$’s RTT is 50 msec and connection $C_2$’s RTT is 100 msec. Assume that when the data rate in the link exceeds the link’s speed, all TCP connections experience data segment loss.
+
+a. If both $C_1$ and $C_2$ at time $t_0$ have a congestion window of 10 segments,
+what are their congestion window sizes after 1000 msec? Their congestion sizes will be both 2, a loss event will be detected and both cnwd will be 2 again. From 0 to 1000ms both connections oscillate between 1 and 2 since the link is heavily congested.
+b. In the long run, will these two connections get the same share of the bandwidth of the congested link? Explain. No, C1 will have a bigger share of the bandwidth since its round trip time is shorter which makes it cwnd increase faster than C2's cwnd (which increases every 100ms, not 50ms).
