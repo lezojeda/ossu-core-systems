@@ -26,6 +26,8 @@
 	**c.** True
 	**f.** True, unnecessary retransmissions would be otherwise sent. The timeout interval can be below 1 sec if future SampleRTT are below 1, but the _current_ timeout interval must be higher than the last SampleRTT
 	**g.** False, the acknowledgment number in the segment A sends to B is independent from the sequence number, it represents what A expects to receive from B.
+	
+---
 ## Problems
 **P1.** Suppose Client A initiates a Telnet session with Server S. At about the same time, Client B also initiates a Telnet session with Server S. Provide possible source and destination port numbers for:
 
